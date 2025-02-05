@@ -4,9 +4,9 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Pixel Desire - Игра для пар</title>
-  <!-- Современный шрифт для профессионального вида -->
+  <!-- Современный шрифт -->
   <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
-  <!-- Скрипт для Telegram Web App -->
+  <!-- Скрипт Telegram Web App -->
   <script src="https://telegram.org/js/telegram-web-app.js"></script>
   <style>
     /* Базовые стили */
@@ -19,7 +19,7 @@
       min-height: 100vh;
       position: relative;
     }
-    /* Стили экранов приложения */
+    /* Экраны */
     .screen {
       display: none;
       width: 100%;
@@ -57,7 +57,7 @@
       margin: 12px;
     }
     button:hover { background: #9370DB; transform: scale(1.05); }
-    /* Экран выбора игр – вертикальное расположение кнопок */
+    /* Экран выбора игр: вертикальное расположение кнопок */
     #categoryScreen .container button {
       display: block;
       width: 80%;
@@ -87,7 +87,7 @@
       border-radius: 10px;
       transition: width 0.5s;
     }
-    /* Эффект перехода: заполнение экрана сердцами */
+    /* Эффект перехода с сердцами */
     .heart-transition {
       position: fixed;
       top: 0;
@@ -109,7 +109,7 @@
       0% { opacity: 1; transform: scale(1); }
       100% { opacity: 0; transform: scale(3); }
     }
-    /* Стили для игры "Собери пазл" */
+    /* Puzzle game */
     #puzzleGameContainer {
       width: 300px;
       height: 300px;
@@ -124,10 +124,13 @@
       width: 25%;
       height: 25%;
       border: 1px solid rgba(0,0,0,0.1);
-      cursor: grab;
+      cursor: pointer;
       background-size: 300px 300px;
     }
-    /* Стили для игры "Найди пары" */
+    .puzzle-piece.selected {
+      outline: 3px dashed red;
+    }
+    /* Memory game */
     #memoryGameContainer {
       display: flex;
       flex-wrap: wrap;
@@ -152,12 +155,36 @@
       color: #fff;
       transform: rotateY(180deg);
     }
-    /* Стили для игры "Лабиринт" */
+    /* Maze game */
     canvas {
       border: 3px solid #8A2BE2;
       margin-bottom: 20px;
       background: #fdfdfd;
       box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+    }
+    #mazeControls {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      margin-top: 10px;
+    }
+    #mazeControls .row {
+      display: flex;
+      justify-content: center;
+      margin: 5px;
+    }
+    #mazeControls button {
+      background: #8A2BE2;
+      color: #fff;
+      border: none;
+      padding: 10px 14px;
+      font-size: 20px;
+      cursor: pointer;
+      border-radius: 50%;
+      margin: 5px;
+    }
+    #mazeControls button:hover {
+      background: #9370DB;
     }
     @media (max-width: 400px) {
       .container { width: 95%; padding: 15px; }
@@ -168,21 +195,19 @@
   </style>
 </head>
 <body>
-  <!-- Диалог 1 -->
+  <!-- Диалоги -->
   <div id="dialogue1" class="screen active">
     <div class="container">
       <p>Каждый раз, когда я думаю о тебе, моё сердце наполняется радостью.</p>
       <button id="dialogue1Btn">Продолжить</button>
     </div>
   </div>
-  <!-- Диалог 2 -->
   <div id="dialogue2" class="screen">
     <div class="container">
       <p>Ты – мой свет, моя опора и вдохновение.</p>
       <button id="dialogue2Btn">Продолжить</button>
     </div>
   </div>
-  <!-- Диалог 3 -->
   <div id="dialogue3" class="screen">
     <div class="container">
       <p>С тобой я чувствую настоящую любовь и готов любить тебя вечно.</p>
@@ -194,7 +219,6 @@
     <div class="container">
       <h1>Выбери игру</h1>
       <p>Испытай свою любовь через игру</p>
-      <!-- Прогресс-бар -->
       <div id="progressContainer">
         <div id="progressText">Осталось игр: 4</div>
         <div id="progressBarContainer">
@@ -208,16 +232,16 @@
       <button id="backToDialogues" style="background:#777;">Назад</button>
     </div>
   </div>
-  <!-- Экран игры "Собери пазл" -->
+  <!-- Пазл -->
   <div id="puzzleScreen" class="screen">
     <div class="container">
       <h1>Собери пазл</h1>
-      <p>Перетащите фрагменты в нужное место</p>
+      <p>Перетащите фрагменты или тапните два для обмена местами</p>
       <div id="puzzleGameContainer"></div>
       <button id="backToCategories1">Назад</button>
     </div>
   </div>
-  <!-- Экран игры "Викторина" -->
+  <!-- Викторина -->
   <div id="quizScreen" class="screen">
     <div class="container">
       <h1>Викторина</h1>
@@ -228,16 +252,25 @@
       <button id="backToCategories2">Назад</button>
     </div>
   </div>
-  <!-- Экран игры "Лабиринт" -->
+  <!-- Лабиринт -->
   <div id="mazeScreen" class="screen">
     <div class="container">
       <h1>Лабиринт</h1>
       <p>Пройдите путь к сердцу!</p>
       <canvas id="mazeCanvas" width="300" height="300"></canvas>
+      <!-- Контроллер для мобильных устройств -->
+      <div id="mazeControls">
+        <button id="btnUp">↑</button>
+        <div class="row">
+          <button id="btnLeft">←</button>
+          <button id="btnDown">↓</button>
+          <button id="btnRight">→</button>
+        </div>
+      </div>
       <button id="backToCategories3">Назад</button>
     </div>
   </div>
-  <!-- Экран игры "Найди пары" -->
+  <!-- Найди пары -->
   <div id="memoryScreen" class="screen">
     <div class="container">
       <h1>Найди пары</h1>
@@ -246,7 +279,7 @@
       <button id="backToCategories4">Назад</button>
     </div>
   </div>
-  <!-- Итоговый экран -->
+  <!-- Итоги -->
   <div id="resultsScreen" class="screen">
     <div class="container">
       <h1>Итоги</h1>
@@ -254,19 +287,24 @@
       <button id="restartButton">Начать заново</button>
     </div>
   </div>
-  <!-- Элемент для анимации переходов (сердца) -->
+  <!-- Переход с сердцами -->
   <div id="heartTransition" class="heart-transition"></div>
   
   <script>
     const tg = window.Telegram.WebApp;
     tg.expand();
 
-    /* Флаги прохождения игр */
     let gameCompletion = { puzzle: false, quiz: false, maze: false, memory: false };
     let currentQuiz = 0, quizScore = 0;
     const heartEmojis = ['❤️','💛','💚','💙','💜','🧡','💖','💘'];
+    
+    // Для лабиринта
+    let currentMaze, currentPlayer, mazeKeyHandler;
+    
+    // Для мобильного пазла (используем выбор двумя тапами)
+    let selectedPuzzlePiece = null;
 
-    /* Функция для эффекта перехода: заполнение экрана анимированными сердцами */
+    // Эффект перехода с сердцами
     function heartTransition(callback) {
       const overlay = document.getElementById('heartTransition');
       overlay.innerHTML = '';
@@ -290,7 +328,6 @@
       }, 500);
     }
 
-    /* Показ нужного экрана с эффектом перехода */
     function showScreen(screenId) {
       heartTransition(() => {
         document.querySelectorAll('.screen').forEach(screen => screen.classList.remove('active'));
@@ -298,7 +335,6 @@
       });
     }
 
-    /* Функция обновления прогресс-бара */
     function updateProgressBar() {
       const totalGames = 4;
       let completed = 0;
@@ -311,13 +347,13 @@
       document.getElementById('progressBar').style.width = percent + '%';
     }
 
-    /* Обработчики диалогов */
+    // Диалоги
     document.getElementById('dialogue1Btn').addEventListener('click', () => { showScreen('dialogue2'); });
     document.getElementById('dialogue2Btn').addEventListener('click', () => { showScreen('dialogue3'); });
     document.getElementById('dialogue3Btn').addEventListener('click', () => { showScreen('categoryScreen'); });
     document.getElementById('backToDialogues').addEventListener('click', () => { showScreen('dialogue1'); });
 
-    /* Обработчики выбора игр */
+    // Выбор игр
     document.getElementById('puzzleGameBtn').addEventListener('click', () => {
       showScreen('puzzleScreen');
       initPuzzleGame();
@@ -340,28 +376,22 @@
     document.getElementById('backToCategories4').addEventListener('click', () => { showScreen('categoryScreen'); });
     document.getElementById('restartButton').addEventListener('click', () => { location.reload(); });
 
-    /* ===== Игра "Собери пазл" ===== */
+    /* --- Puzzle Game --- */
     function initPuzzleGame() {
       const container = document.getElementById('puzzleGameContainer');
       container.innerHTML = '';
       const rows = 4, cols = 4;
       const totalPieces = rows * cols;
-      // Массив индексов от 0 до totalPieces-1, перемешанный случайным образом
       let positions = Array.from({ length: totalPieces }, (_, i) => i);
       positions.sort(() => Math.random() - 0.5);
       
-      // Для каждого фрагмента задаём правильное положение по изображению
       positions.forEach((pos, i) => {
         const piece = document.createElement('div');
         piece.classList.add('puzzle-piece');
-        // Сохраняем правильный индекс в data-атрибуте
         piece.dataset.correctIndex = i;
-        // Сохраняем текущее положение в data-атрибуте и обновляем стиль order
         piece.dataset.order = pos;
         piece.style.order = pos;
-        // Задаём картинку – файл лежит рядом с index.html
         piece.style.backgroundImage = 'url("1644845170_28-fikiwiki-com-p-nyashnie-kotiki-milie-kartinki-29.jpg")';
-        // Вычисляем позицию фрагмента по сетке 4x4
         const correctRow = Math.floor(i / cols);
         const correctCol = i % cols;
         piece.style.backgroundPosition = `-${correctCol * (300 / cols)}px -${correctRow * (300 / rows)}px`;
@@ -369,13 +399,15 @@
         piece.addEventListener('dragstart', puzzleDragStart);
         piece.addEventListener('dragover', puzzleDragOver);
         piece.addEventListener('drop', puzzleDrop);
+        // Для мобильных устройств: используем тап для выбора/обмена
+        piece.addEventListener('touchend', puzzleTouchEnd, false);
         container.appendChild(piece);
       });
       container.addEventListener('dragend', checkPuzzleCompletion);
       gameCompletion.puzzle = false;
+      selectedPuzzlePiece = null;
     }
     function puzzleDragStart(e) {
-      // Используем data-order вместо style.order
       e.dataTransfer.setData('text/plain', e.target.dataset.order);
       e.dataTransfer.effectAllowed = 'move';
     }
@@ -387,17 +419,35 @@
       e.preventDefault();
       const draggedOrder = e.dataTransfer.getData('text/plain');
       const targetOrder = e.target.dataset.order;
-      
-      // Находим элемент, у которого data-order равен draggedOrder
       const draggedElem = document.querySelector(`.puzzle-piece[data-order="${draggedOrder}"]`);
       if (draggedElem) {
-        // Меняем значения data-order и обновляем стиль order
         draggedElem.dataset.order = targetOrder;
         draggedElem.style.order = targetOrder;
       }
-      // Обновляем data-order и стиль order для цели сброса
       e.target.dataset.order = draggedOrder;
       e.target.style.order = draggedOrder;
+    }
+    // Touch handler для мобильного: по два тапа для обмена
+    function puzzleTouchEnd(e) {
+      e.preventDefault();
+      const piece = e.currentTarget;
+      if (selectedPuzzlePiece && selectedPuzzlePiece !== piece) {
+        // Меняем местами выбранный кусочек и текущий
+        const tempOrder = selectedPuzzlePiece.dataset.order;
+        selectedPuzzlePiece.dataset.order = piece.dataset.order;
+        selectedPuzzlePiece.style.order = piece.dataset.order;
+        piece.dataset.order = tempOrder;
+        piece.style.order = tempOrder;
+        selectedPuzzlePiece.classList.remove('selected');
+        selectedPuzzlePiece = null;
+        checkPuzzleCompletion();
+      } else if (!selectedPuzzlePiece) {
+        selectedPuzzlePiece = piece;
+        piece.classList.add('selected');
+      } else if (selectedPuzzlePiece === piece) {
+        piece.classList.remove('selected');
+        selectedPuzzlePiece = null;
+      }
     }
     function checkPuzzleCompletion() {
       const pieces = document.querySelectorAll('.puzzle-piece');
@@ -415,7 +465,7 @@
       }
     }
 
-    /* ===== Игра "Викторина" ===== */
+    /* --- Quiz Game --- */
     const quizQuestions = [
       { q: "Какой цвет символизирует любовь?", a: ["Красный", "Синий", "Желтый"], correct: 0 },
       { q: "Что является символом нежности?", a: ["Роза", "Лилия", "Тюльпан"], correct: 0 },
@@ -453,7 +503,7 @@
       }
     }
 
-    /* ===== Игра "Лабиринт" ===== */
+    /* --- Maze Game --- */
     function initMazeGame() {
       const canvas = document.getElementById('mazeCanvas');
       const ctx = canvas.getContext('2d');
@@ -461,24 +511,33 @@
       drawMaze(ctx, maze);
       const player = { x: 0, y: 0 };
       drawPlayer(ctx, player);
-      document.addEventListener('keydown', function mazeKeyHandler(e) {
+      currentMaze = maze;
+      currentPlayer = player;
+      mazeKeyHandler = function(e) {
         let moved = false;
-        if (e.key === 'ArrowUp' && canMove(player, maze, 0, -1)) { player.y--; moved = true; }
-        else if (e.key === 'ArrowDown' && canMove(player, maze, 0, 1)) { player.y++; moved = true; }
-        else if (e.key === 'ArrowLeft' && canMove(player, maze, -1, 0)) { player.x--; moved = true; }
-        else if (e.key === 'ArrowRight' && canMove(player, maze, 1, 0)) { player.x++; moved = true; }
-        if (moved) {
-          drawMaze(ctx, maze);
-          drawPlayer(ctx, player);
-          if (player.x === maze.cols - 1 && player.y === maze.rows - 1) {
-            alert("Лабиринт пройден!");
-            gameCompletion.maze = true;
-            updateProgressBar();
-            checkAllGamesCompleted();
-            document.removeEventListener('keydown', mazeKeyHandler);
-          }
+        if (e.key === 'ArrowUp') { movePlayer(0, -1); moved = true; }
+        else if (e.key === 'ArrowDown') { movePlayer(0, 1); moved = true; }
+        else if (e.key === 'ArrowLeft') { movePlayer(-1, 0); moved = true; }
+        else if (e.key === 'ArrowRight') { movePlayer(1, 0); moved = true; }
+        if(moved) e.preventDefault();
+      };
+      document.addEventListener('keydown', mazeKeyHandler);
+    }
+    function movePlayer(dx, dy) {
+      if (canMove(currentPlayer, currentMaze, dx, dy)) {
+        currentPlayer.x += dx;
+        currentPlayer.y += dy;
+        const ctx = document.getElementById('mazeCanvas').getContext('2d');
+        drawMaze(ctx, currentMaze);
+        drawPlayer(ctx, currentPlayer);
+        if (currentPlayer.x === currentMaze.cols - 1 && currentPlayer.y === currentMaze.rows - 1) {
+          alert("Лабиринт пройден!");
+          gameCompletion.maze = true;
+          updateProgressBar();
+          checkAllGamesCompleted();
+          document.removeEventListener('keydown', mazeKeyHandler);
         }
-      });
+      }
     }
     function generateMaze(cols, rows) {
       const maze = { cols, rows, grid: [] };
@@ -534,7 +593,6 @@
       ctx.beginPath();
       ctx.arc(player.x * cellWidth + cellWidth / 2, player.y * cellHeight + cellHeight / 2, Math.min(cellWidth, cellHeight) / 4, 0, Math.PI * 2);
       ctx.fill();
-      // Тень для игрока
       ctx.shadowColor = 'rgba(0, 0, 0, 0.3)';
       ctx.shadowBlur = 10;
     }
@@ -548,8 +606,14 @@
       if (x + dx < 0 || x + dx >= maze.cols || y + dy < 0 || y + dy >= maze.rows) return false;
       return true;
     }
+    
+    // Обработчики для on-screen кнопок лабиринта
+    document.getElementById('btnUp').addEventListener('click', () => movePlayer(0, -1));
+    document.getElementById('btnDown').addEventListener('click', () => movePlayer(0, 1));
+    document.getElementById('btnLeft').addEventListener('click', () => movePlayer(-1, 0));
+    document.getElementById('btnRight').addEventListener('click', () => movePlayer(1, 0));
 
-    /* ===== Игра "Найди пары" ===== */
+    /* --- Memory Game --- */
     function initMemoryGame() {
       const container = document.getElementById('memoryGameContainer');
       container.innerHTML = '';
@@ -573,7 +637,6 @@
       const card = e.target;
       if (card.classList.contains('flipped')) return;
       card.classList.add('flipped');
-      // Используем разные сердечки в зависимости от значения карточки
       card.textContent = heartEmojis[parseInt(card.dataset.value) % heartEmojis.length];
       if (!window.memoryState.firstCard) {
         window.memoryState.firstCard = card;
@@ -605,7 +668,352 @@
       window.memoryState.lock = false;
     }
 
-    /* Проверка прохождения всех игр для отображения кнопки "Итоги" */
+    function checkAllGamesCompleted() {
+      if (gameCompletion.puzzle && gameCompletion.quiz && gameCompletion.maze && gameCompletion.memory) {
+        if (!document.getElementById('resultsButton')) {
+          const resultsButton = document.createElement('button');
+          resultsButton.id = 'resultsButton';
+          resultsButton.textContent = 'Итоги';
+          resultsButton.addEventListener('click', () => {
+            showScreen('resultsScreen');
+            displayResults();
+          });
+          document.getElementById('categoryScreen').querySelector('.container').appendChild(resultsButton);
+        }
+      }
+    }
+    function displayResults() {
+      const loveScore = Math.floor((quizScore / quizQuestions.length) * 100);
+      document.getElementById('resultsText').textContent = "Ваш уровень любви: " + loveScore + "%. Вы доказали, что ваша любовь крепка и настояща!";
+    }
+
+    /* --- Maze Game --- */
+    function initMazeGame() {
+      const canvas = document.getElementById('mazeCanvas');
+      const ctx = canvas.getContext('2d');
+      const maze = generateMaze(10, 10);
+      drawMaze(ctx, maze);
+      const player = { x: 0, y: 0 };
+      drawPlayer(ctx, player);
+      currentMaze = maze;
+      currentPlayer = player;
+      mazeKeyHandler = function(e) {
+        let moved = false;
+        if (e.key === 'ArrowUp') { movePlayer(0, -1); moved = true; }
+        else if (e.key === 'ArrowDown') { movePlayer(0, 1); moved = true; }
+        else if (e.key === 'ArrowLeft') { movePlayer(-1, 0); moved = true; }
+        else if (e.key === 'ArrowRight') { movePlayer(1, 0); moved = true; }
+        if(moved) e.preventDefault();
+      };
+      document.addEventListener('keydown', mazeKeyHandler);
+    }
+    function movePlayer(dx, dy) {
+      if (canMove(currentPlayer, currentMaze, dx, dy)) {
+        currentPlayer.x += dx;
+        currentPlayer.y += dy;
+        const ctx = document.getElementById('mazeCanvas').getContext('2d');
+        drawMaze(ctx, currentMaze);
+        drawPlayer(ctx, currentPlayer);
+        if (currentPlayer.x === currentMaze.cols - 1 && currentPlayer.y === currentMaze.rows - 1) {
+          alert("Лабиринт пройден!");
+          gameCompletion.maze = true;
+          updateProgressBar();
+          checkAllGamesCompleted();
+          document.removeEventListener('keydown', mazeKeyHandler);
+        }
+      }
+    }
+    function generateMaze(cols, rows) {
+      const maze = { cols, rows, grid: [] };
+      for (let y = 0; y < rows; y++) {
+        maze.grid[y] = [];
+        for (let x = 0; x < cols; x++) {
+          maze.grid[y][x] = { top: true, right: true, bottom: true, left: true, visited: false };
+        }
+      }
+      function carve(x, y) {
+        maze.grid[y][x].visited = true;
+        const directions = ['up', 'right', 'down', 'left'].sort(() => Math.random() - 0.5);
+        directions.forEach(dir => {
+          let nx = x, ny = y;
+          if (dir === 'up') ny--;
+          else if (dir === 'down') ny++;
+          else if (dir === 'left') nx--;
+          else if (dir === 'right') nx++;
+          if (nx >= 0 && nx < cols && ny >= 0 && ny < rows && !maze.grid[ny][nx].visited) {
+            if (dir === 'up') { maze.grid[y][x].top = false; maze.grid[ny][nx].bottom = false; }
+            else if (dir === 'down') { maze.grid[y][x].bottom = false; maze.grid[ny][nx].top = false; }
+            else if (dir === 'left') { maze.grid[y][x].left = false; maze.grid[ny][nx].right = false; }
+            else if (dir === 'right') { maze.grid[y][x].right = false; maze.grid[ny][nx].left = false; }
+            carve(nx, ny);
+          }
+        });
+      }
+      carve(0, 0);
+      return maze;
+    }
+    function drawMaze(ctx, maze) {
+      const cellWidth = ctx.canvas.width / maze.cols;
+      const cellHeight = ctx.canvas.height / maze.rows;
+      ctx.fillStyle = '#fdfdfd';
+      ctx.fillRect(0, 0, ctx.canvas.width, ctx.canvas.height);
+      ctx.strokeStyle = '#8A2BE2';
+      ctx.lineWidth = 4;
+      for (let y = 0; y < maze.rows; y++) {
+        for (let x = 0; x < maze.cols; x++) {
+          const cell = maze.grid[y][x];
+          const xPos = x * cellWidth, yPos = y * cellHeight;
+          if (cell.top) { ctx.beginPath(); ctx.moveTo(xPos, yPos); ctx.lineTo(xPos + cellWidth, yPos); ctx.stroke(); }
+          if (cell.right) { ctx.beginPath(); ctx.moveTo(xPos + cellWidth, yPos); ctx.lineTo(xPos + cellWidth, yPos + cellHeight); ctx.stroke(); }
+          if (cell.bottom) { ctx.beginPath(); ctx.moveTo(xPos + cellWidth, yPos + cellHeight); ctx.lineTo(xPos, yPos + cellHeight); ctx.stroke(); }
+          if (cell.left) { ctx.beginPath(); ctx.moveTo(xPos, yPos + cellHeight); ctx.lineTo(xPos, yPos); ctx.stroke(); }
+        }
+      }
+    }
+    function drawPlayer(ctx, player) {
+      const cellWidth = ctx.canvas.width / 10;
+      const cellHeight = ctx.canvas.height / 10;
+      ctx.fillStyle = '#8A2BE2';
+      ctx.beginPath();
+      ctx.arc(player.x * cellWidth + cellWidth / 2, player.y * cellHeight + cellHeight / 2, Math.min(cellWidth, cellHeight) / 4, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.shadowColor = 'rgba(0, 0, 0, 0.3)';
+      ctx.shadowBlur = 10;
+    }
+    function canMove(player, maze, dx, dy) {
+      const x = player.x, y = player.y;
+      const cell = maze.grid[y][x];
+      if (dx === -1 && cell.left) return false;
+      if (dx === 1 && cell.right) return false;
+      if (dy === -1 && cell.top) return false;
+      if (dy === 1 && cell.bottom) return false;
+      if (x + dx < 0 || x + dx >= maze.cols || y + dy < 0 || y + dy >= maze.rows) return false;
+      return true;
+    }
+
+    /* --- Memory Game --- */
+    function initMemoryGame() {
+      const container = document.getElementById('memoryGameContainer');
+      container.innerHTML = '';
+      const cards = [];
+      const totalPairs = 8;
+      for (let i = 0; i < totalPairs; i++) {
+        cards.push(i, i);
+      }
+      cards.sort(() => Math.random() - 0.5);
+      cards.forEach(cardValue => {
+        const card = document.createElement('div');
+        card.classList.add('memory-card');
+        card.dataset.value = cardValue;
+        card.addEventListener('click', memoryCardClick);
+        container.appendChild(card);
+      });
+      window.memoryState = { firstCard: null, secondCard: null, lock: false, matches: 0 };
+    }
+    function memoryCardClick(e) {
+      if (window.memoryState.lock) return;
+      const card = e.target;
+      if (card.classList.contains('flipped')) return;
+      card.classList.add('flipped');
+      card.textContent = heartEmojis[parseInt(card.dataset.value) % heartEmojis.length];
+      if (!window.memoryState.firstCard) {
+        window.memoryState.firstCard = card;
+      } else {
+        window.memoryState.secondCard = card;
+        window.memoryState.lock = true;
+        setTimeout(checkMemoryMatch, 800);
+      }
+    }
+    function checkMemoryMatch() {
+      const first = window.memoryState.firstCard;
+      const second = window.memoryState.secondCard;
+      if (first.dataset.value === second.dataset.value) {
+        window.memoryState.matches++;
+        if (window.memoryState.matches === 8) {
+          alert("Вы нашли все пары!");
+          gameCompletion.memory = true;
+          updateProgressBar();
+          checkAllGamesCompleted();
+        }
+      } else {
+        first.classList.remove('flipped');
+        second.classList.remove('flipped');
+        first.textContent = '';
+        second.textContent = '';
+      }
+      window.memoryState.firstCard = null;
+      window.memoryState.secondCard = null;
+      window.memoryState.lock = false;
+    }
+
+    /* --- Maze Game --- */
+    function initMazeGame() {
+      const canvas = document.getElementById('mazeCanvas');
+      const ctx = canvas.getContext('2d');
+      const maze = generateMaze(10, 10);
+      drawMaze(ctx, maze);
+      const player = { x: 0, y: 0 };
+      drawPlayer(ctx, player);
+      currentMaze = maze;
+      currentPlayer = player;
+      mazeKeyHandler = function(e) {
+        let moved = false;
+        if (e.key === 'ArrowUp') { movePlayer(0, -1); moved = true; }
+        else if (e.key === 'ArrowDown') { movePlayer(0, 1); moved = true; }
+        else if (e.key === 'ArrowLeft') { movePlayer(-1, 0); moved = true; }
+        else if (e.key === 'ArrowRight') { movePlayer(1, 0); moved = true; }
+        if(moved) e.preventDefault();
+      };
+      document.addEventListener('keydown', mazeKeyHandler);
+    }
+    function movePlayer(dx, dy) {
+      if (canMove(currentPlayer, currentMaze, dx, dy)) {
+        currentPlayer.x += dx;
+        currentPlayer.y += dy;
+        const ctx = document.getElementById('mazeCanvas').getContext('2d');
+        drawMaze(ctx, currentMaze);
+        drawPlayer(ctx, currentPlayer);
+        if (currentPlayer.x === currentMaze.cols - 1 && currentPlayer.y === currentMaze.rows - 1) {
+          alert("Лабиринт пройден!");
+          gameCompletion.maze = true;
+          updateProgressBar();
+          checkAllGamesCompleted();
+          document.removeEventListener('keydown', mazeKeyHandler);
+        }
+      }
+    }
+    function generateMaze(cols, rows) {
+      const maze = { cols, rows, grid: [] };
+      for (let y = 0; y < rows; y++) {
+        maze.grid[y] = [];
+        for (let x = 0; x < cols; x++) {
+          maze.grid[y][x] = { top: true, right: true, bottom: true, left: true, visited: false };
+        }
+      }
+      function carve(x, y) {
+        maze.grid[y][x].visited = true;
+        const directions = ['up', 'right', 'down', 'left'].sort(() => Math.random() - 0.5);
+        directions.forEach(dir => {
+          let nx = x, ny = y;
+          if (dir === 'up') ny--;
+          else if (dir === 'down') ny++;
+          else if (dir === 'left') nx--;
+          else if (dir === 'right') nx++;
+          if (nx >= 0 && nx < cols && ny >= 0 && ny < rows && !maze.grid[ny][nx].visited) {
+            if (dir === 'up') { maze.grid[y][x].top = false; maze.grid[ny][nx].bottom = false; }
+            else if (dir === 'down') { maze.grid[y][x].bottom = false; maze.grid[ny][nx].top = false; }
+            else if (dir === 'left') { maze.grid[y][x].left = false; maze.grid[ny][nx].right = false; }
+            else if (dir === 'right') { maze.grid[y][x].right = false; maze.grid[ny][nx].left = false; }
+            carve(nx, ny);
+          }
+        });
+      }
+      carve(0, 0);
+      return maze;
+    }
+    function drawMaze(ctx, maze) {
+      const cellWidth = ctx.canvas.width / maze.cols;
+      const cellHeight = ctx.canvas.height / maze.rows;
+      ctx.fillStyle = '#fdfdfd';
+      ctx.fillRect(0, 0, ctx.canvas.width, ctx.canvas.height);
+      ctx.strokeStyle = '#8A2BE2';
+      ctx.lineWidth = 4;
+      for (let y = 0; y < maze.rows; y++) {
+        for (let x = 0; x < maze.cols; x++) {
+          const cell = maze.grid[y][x];
+          const xPos = x * cellWidth, yPos = y * cellHeight;
+          if (cell.top) { ctx.beginPath(); ctx.moveTo(xPos, yPos); ctx.lineTo(xPos + cellWidth, yPos); ctx.stroke(); }
+          if (cell.right) { ctx.beginPath(); ctx.moveTo(xPos + cellWidth, yPos); ctx.lineTo(xPos + cellWidth, yPos + cellHeight); ctx.stroke(); }
+          if (cell.bottom) { ctx.beginPath(); ctx.moveTo(xPos + cellWidth, yPos + cellHeight); ctx.lineTo(xPos, yPos + cellHeight); ctx.stroke(); }
+          if (cell.left) { ctx.beginPath(); ctx.moveTo(xPos, yPos + cellHeight); ctx.lineTo(xPos, yPos); ctx.stroke(); }
+        }
+      }
+    }
+    function drawPlayer(ctx, player) {
+      const cellWidth = ctx.canvas.width / 10;
+      const cellHeight = ctx.canvas.height / 10;
+      ctx.fillStyle = '#8A2BE2';
+      ctx.beginPath();
+      ctx.arc(player.x * cellWidth + cellWidth / 2, player.y * cellHeight + cellHeight / 2, Math.min(cellWidth, cellHeight) / 4, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.shadowColor = 'rgba(0, 0, 0, 0.3)';
+      ctx.shadowBlur = 10;
+    }
+    function canMove(player, maze, dx, dy) {
+      const x = player.x, y = player.y;
+      const cell = maze.grid[y][x];
+      if (dx === -1 && cell.left) return false;
+      if (dx === 1 && cell.right) return false;
+      if (dy === -1 && cell.top) return false;
+      if (dy === 1 && cell.bottom) return false;
+      if (x + dx < 0 || x + dx >= maze.cols || y + dy < 0 || y + dy >= maze.rows) return false;
+      return true;
+    }
+
+    /* --- Memory Game --- */
+    // (см. выше)
+
+    /* --- Maze Game Control Buttons --- */
+    document.getElementById('btnUp').addEventListener('click', () => movePlayer(0, -1));
+    document.getElementById('btnDown').addEventListener('click', () => movePlayer(0, 1));
+    document.getElementById('btnLeft').addEventListener('click', () => movePlayer(-1, 0));
+    document.getElementById('btnRight').addEventListener('click', () => movePlayer(1, 0));
+
+    /* --- Memory Game --- */
+    function initMemoryGame() {
+      const container = document.getElementById('memoryGameContainer');
+      container.innerHTML = '';
+      const cards = [];
+      const totalPairs = 8;
+      for (let i = 0; i < totalPairs; i++) {
+        cards.push(i, i);
+      }
+      cards.sort(() => Math.random() - 0.5);
+      cards.forEach(cardValue => {
+        const card = document.createElement('div');
+        card.classList.add('memory-card');
+        card.dataset.value = cardValue;
+        card.addEventListener('click', memoryCardClick);
+        container.appendChild(card);
+      });
+      window.memoryState = { firstCard: null, secondCard: null, lock: false, matches: 0 };
+    }
+    function memoryCardClick(e) {
+      if (window.memoryState.lock) return;
+      const card = e.target;
+      if (card.classList.contains('flipped')) return;
+      card.classList.add('flipped');
+      card.textContent = heartEmojis[parseInt(card.dataset.value) % heartEmojis.length];
+      if (!window.memoryState.firstCard) {
+        window.memoryState.firstCard = card;
+      } else {
+        window.memoryState.secondCard = card;
+        window.memoryState.lock = true;
+        setTimeout(checkMemoryMatch, 800);
+      }
+    }
+    function checkMemoryMatch() {
+      const first = window.memoryState.firstCard;
+      const second = window.memoryState.secondCard;
+      if (first.dataset.value === second.dataset.value) {
+        window.memoryState.matches++;
+        if (window.memoryState.matches === 8) {
+          alert("Вы нашли все пары!");
+          gameCompletion.memory = true;
+          updateProgressBar();
+          checkAllGamesCompleted();
+        }
+      } else {
+        first.classList.remove('flipped');
+        second.classList.remove('flipped');
+        first.textContent = '';
+        second.textContent = '';
+      }
+      window.memoryState.firstCard = null;
+      window.memoryState.secondCard = null;
+      window.memoryState.lock = false;
+    }
+
     function checkAllGamesCompleted() {
       if (gameCompletion.puzzle && gameCompletion.quiz && gameCompletion.maze && gameCompletion.memory) {
         if (!document.getElementById('resultsButton')) {
