@@ -366,7 +366,8 @@
     const tg = window.Telegram.WebApp;
     tg.expand();
     
-    // Задаём дату разблокировки (МСК). Измените значение unlockDate для тестирования.
+    // Задаём дату разблокировки (МСК). Для тестирования можно изменить на ближайшую дату, например:
+    // const unlockDate = new Date(Date.now() + 60000); // через 1 минуту
     const unlockDate = new Date("2023-02-07T00:00:00+03:00");
     
     let gameCompletion = { puzzle: false, quiz: false, maze: false, memory: false };
@@ -514,7 +515,6 @@
       const totalPieces = rows * cols;
       let positions = Array.from({ length: totalPieces }, (_, i) => i);
       positions.sort(() => Math.random() - 0.5);
-      
       positions.forEach((pos, i) => {
         const piece = document.createElement('div');
         piece.classList.add('puzzle-piece');
@@ -715,6 +715,29 @@
         }
       }
     }
+    // Функция рисования игрока (шарика)
+    function drawPlayer(ctx, player) {
+      const cellWidth = ctx.canvas.width / 10;
+      const cellHeight = ctx.canvas.height / 10;
+      // Задаём тень до рисования
+      ctx.shadowColor = 'rgba(0, 0, 0, 0.3)';
+      ctx.shadowBlur = 10;
+      ctx.fillStyle = '#8A2BE2';
+      ctx.beginPath();
+      ctx.arc(player.x * cellWidth + cellWidth / 2, player.y * cellHeight + cellHeight / 2, Math.min(cellWidth, cellHeight) / 4, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.shadowBlur = 0; // сбрасываем тень
+    }
+    // Функция рисования выхода лабиринта (белое сердечко)
+    function drawExit(ctx, maze) {
+      const cellWidth = ctx.canvas.width / maze.cols;
+      const cellHeight = ctx.canvas.height / maze.rows;
+      const exitX = (maze.cols - 1) * cellWidth;
+      const exitY = (maze.rows - 1) * cellHeight;
+      ctx.font = "40px serif";
+      ctx.fillStyle = "#FFFFFF";
+      ctx.fillText("🤍", exitX + cellWidth/4, exitY + cellHeight*0.75);
+    }
     
     /* --- Memory Game --- */
     function initMemoryGame() {
@@ -876,7 +899,7 @@
       }
     }
     
-    /* --- Начало работы: проверка даты разблокировки --- */
+    /* Начало работы: проверка даты разблокировки */
     function checkUnlock() {
       const now = new Date();
       if (now < unlockDate) {
