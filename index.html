@@ -9,19 +9,28 @@
   <!-- Telegram Web App API -->
   <script src="https://telegram.org/js/telegram-web-app.js"></script>
   <style>
+    /* Общие стили */
     body {
       margin: 0;
       padding: 0;
-      background-color: #1e1e1e;
+      background: #1e1e1e;
       color: #fff;
       font-family: 'Press Start 2P', cursive;
       text-align: center;
     }
     .container {
-      max-width: 500px;
-      margin: auto;
+      max-width: 600px;
+      margin: 20px auto;
       padding: 20px;
+      background: #292929;
+      border-radius: 10px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.5);
     }
+    h1 {
+      margin-bottom: 20px;
+      font-size: 24px;
+    }
+    /* Стили для вкладок */
     .tabs {
       display: flex;
       justify-content: space-around;
@@ -29,28 +38,53 @@
     }
     .tab {
       flex: 1;
+      margin: 0 10px;
       padding: 10px;
       background: #333;
-      margin: 0 5px;
       border-radius: 5px;
       cursor: pointer;
+      transition: background 0.3s;
+    }
+    .tab:hover {
+      background: #444;
     }
     .tab.disabled {
       background: #555;
-      pointer-events: none;
+      cursor: default;
     }
+    /* Стили для контейнера игры */
+    #game-container {
+      min-height: 200px;
+      background: #1e1e1e;
+      padding: 20px;
+      border: 2px solid #444;
+      border-radius: 5px;
+    }
+    /* Стили для кнопок */
     button {
+      margin-top: 20px;
       padding: 10px 20px;
-      background: #4CAF50;
+      background: #4caf50;
       border: none;
       border-radius: 5px;
-      cursor: pointer;
-      font-size: 16px;
+      font-size: 14px;
       color: #fff;
-      margin-top: 15px;
+      cursor: pointer;
+      transition: background 0.3s;
     }
     button:hover {
       background: #45a049;
+    }
+    /* Стили для input */
+    input[type="text"] {
+      padding: 8px;
+      font-size: 14px;
+      border: 2px solid #444;
+      border-radius: 5px;
+      background: #292929;
+      color: #fff;
+      width: 80%;
+      margin-top: 10px;
     }
   </style>
 </head>
@@ -62,26 +96,25 @@
       <div id="tab-14feb" class="tab">14 февраля</div>
     </div>
     <div id="game-container">
-      <p>Выберите вкладку, когда она станет доступной</p>
+      <p>Выберите вкладку, чтобы начать игру</p>
     </div>
   </div>
 
   <script>
-    // Инициализируем Telegram Web App
+    // Инициализация Telegram Web App
     const tg = window.Telegram.WebApp;
     tg.expand();
 
     document.addEventListener("DOMContentLoaded", () => {
       const tab7March = document.getElementById("tab-7march");
       const tab14Feb = document.getElementById("tab-14feb");
-      const gameContainer = document.getElementById("game-container");
 
+      // Для теста: ставим даты разблокировки в прошлом (например, 2023 год)
+      const unlockDate7March = new Date("2023-03-07");
+      const unlockDate14Feb = new Date("2023-02-14");
       const currentDate = new Date();
-      // Задаём даты разблокировки
-      const unlockDate7March = new Date("2025-03-07");
-      const unlockDate14Feb = new Date("2025-02-14");
 
-      // Блокируем вкладки, если дата ещё не наступила
+      // Если текущая дата позже дат разблокировки, вкладки остаются активными
       if (currentDate < unlockDate7March) {
         tab7March.innerHTML = "🔒 Откроется 7 марта";
         tab7March.classList.add("disabled");
@@ -91,7 +124,7 @@
         tab14Feb.classList.add("disabled");
       }
 
-      // Назначаем обработчики событий для разблокированных вкладок
+      // Назначаем обработчики событий, если вкладка активна
       if (!tab7March.classList.contains("disabled")) {
         tab7March.addEventListener("click", () => startGame('7march'));
       }
@@ -100,7 +133,7 @@
       }
     });
 
-    // Функция запуска игры в зависимости от выбранной вкладки
+    // Запуск игры в зависимости от выбранной вкладки
     function startGame(tab) {
       const gameContainer = document.getElementById("game-container");
       if (tab === '7march') {
@@ -108,25 +141,50 @@
         loadPuzzle(1);
       } else if (tab === '14feb') {
         gameContainer.innerHTML = "<p>Сюрприз для 14 февраля! Здесь будет что-то особенное.</p>";
-        // Можно добавить дополнительный функционал для 14 февраля
+        // Здесь можно добавить дополнительный функционал для 14 февраля
       }
     }
 
-    // Функция загрузки головоломок по уровням
+    // Загрузка головоломок по уровням
     function loadPuzzle(level) {
       const gameContainer = document.getElementById("game-container");
       switch(level) {
         case 1:
-          gameContainer.innerHTML = "<p>Головоломка 1: Разгадайте шифр!</p><button onclick='nextLevel(2)'>Ответить</button>";
+          gameContainer.innerHTML = `
+            <p>Головоломка 1: Разгадайте шифр!</p>
+            <p>Подсказка: Введите слово, связанное с этим мессенджером.</p>
+            <input id="cipher-input" type="text" placeholder="Ваш ответ">
+            <br>
+            <button onclick="checkCipher()">Ответить</button>
+          `;
           break;
         case 2:
-          gameContainer.innerHTML = "<p>Головоломка 2: Найдите правильный путь в лабиринте!</p><button onclick='nextLevel(3)'>Далее</button>";
+          gameContainer.innerHTML = `
+            <p>Головоломка 2: Найдите правильный путь в лабиринте!</p>
+            <p>(Просто нажмите кнопку, чтобы продолжить.)</p>
+            <button onclick="nextLevel(3)">Далее</button>
+          `;
           break;
         case 3:
-          gameContainer.innerHTML = "<p>Головоломка 3: Соберите пазл!</p><button onclick='finishGame()'>Завершить</button>";
+          gameContainer.innerHTML = `
+            <p>Головоломка 3: Соберите пазл!</p>
+            <p>(Кликните на кнопку, чтобы собрать пазл.)</p>
+            <button onclick="finishGame()">Собрать пазл</button>
+          `;
           break;
         default:
           gameContainer.innerHTML = "<p>Квест завершён.</p>";
+      }
+    }
+
+    // Проверка ответа для Головоломки 1
+    function checkCipher() {
+      const input = document.getElementById("cipher-input").value.toLowerCase().trim();
+      // Пример правильного ответа: "telegram"
+      if (input === "telegram") {
+        nextLevel(2);
+      } else {
+        alert("Неправильно, попробуйте снова!");
       }
     }
 
