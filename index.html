@@ -13,8 +13,8 @@
     * { margin: 0; padding: 0; box-sizing: border-box; }
     body {
       font-family: 'Roboto', sans-serif;
-      background: linear-gradient(135deg, #ff7e67, #ffb56c);
-      color: #333;
+      background: linear-gradient(135deg, #8A2BE2, #000000);
+      color: #fff;
       overflow-x: hidden;
       min-height: 100vh;
       position: relative;
@@ -41,11 +41,12 @@
       width: 90%;
       max-width: 500px;
       text-align: center;
+      color: #000;
     }
-    h1 { font-size: 26px; margin-bottom: 12px; color: #ff6347; }
+    h1 { font-size: 26px; margin-bottom: 12px; color: #8A2BE2; }
     p { font-size: 20px; margin-bottom: 20px; line-height: 1.5; }
     button {
-      background: #ff6347;
+      background: #8A2BE2;
       color: #fff;
       border: none;
       padding: 14px 24px;
@@ -55,14 +56,14 @@
       transition: background 0.3s, transform 0.3s;
       margin: 12px;
     }
-    button:hover { background: #ff826a; transform: scale(1.05); }
+    button:hover { background: #9370DB; transform: scale(1.05); }
     /* Экран выбора игр – вертикальное расположение кнопок */
     #categoryScreen .container button {
       display: block;
       width: 80%;
       margin: 12px auto;
     }
-    /* Прогресс-бар, показывающий сколько игр осталось до открытия итоговой кнопки */
+    /* Прогресс-бар */
     #progressContainer {
       margin: 12px auto;
       width: 80%;
@@ -82,7 +83,7 @@
     #progressBar {
       width: 0;
       height: 100%;
-      background: #ff6347;
+      background: #8A2BE2;
       border-radius: 10px;
       transition: width 0.5s;
     }
@@ -101,7 +102,7 @@
       position: absolute;
       width: 30px;
       height: 30px;
-      background: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><path fill="%23ff6347" d="M462.3 62.6c-54.5-46.4-136-38.3-178.7 13.7L256 108.3l-27.6-32c-42.6-52-124.1-60.1-178.7-13.7-62.2 53-66.1 149.8-9.9 207.4l193.5 199.8c12 12.4 28.3 18.7 44.6 18.7s32.6-6.2 44.6-18.7l193.5-199.8c56.3-57.6 52.3-154.4-9.9-207.4z"/></svg>') no-repeat center/contain;
+      background: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><path fill="%238A2BE2" d="M462.3 62.6c-54.5-46.4-136-38.3-178.7 13.7L256 108.3l-27.6-32c-42.6-52-124.1-60.1-178.7-13.7-62.2 53-66.1 149.8-9.9 207.4l193.5 199.8c12 12.4 28.3 18.7 44.6 18.7s32.6-6.2 44.6-18.7l193.5-199.8c56.3-57.6 52.3-154.4-9.9-207.4z"/></svg>') no-repeat center/contain;
       animation: heartFade 1.8s ease-out forwards;
     }
     @keyframes heartFade {
@@ -109,18 +110,16 @@
       100% { opacity: 0; transform: scale(3); }
     }
     /* Стили для игры "Собери пазл" */
-    /* Контейнер пазла – 300x300 пикселей */
     #puzzleGameContainer {
       width: 300px;
       height: 300px;
       display: flex;
       flex-wrap: wrap;
-      border: 2px solid #ff6347;
+      border: 2px solid #8A2BE2;
       margin: 0 auto 20px auto;
       background: #fff;
       position: relative;
     }
-    /* Каждый фрагмент – 1/4 от контейнера (для 4x4 пазла) */
     .puzzle-piece {
       width: 25%;
       height: 25%;
@@ -138,7 +137,7 @@
       width: 70px;
       height: 70px;
       background: #fff;
-      border: 2px solid #ff6347;
+      border: 2px solid #8A2BE2;
       border-radius: 8px;
       margin: 5px;
       font-size: 32px;
@@ -149,13 +148,13 @@
       transition: transform 0.3s;
     }
     .memory-card.flipped {
-      background: #ff6347;
+      background: #8A2BE2;
       color: #fff;
       transform: rotateY(180deg);
     }
     /* Стили для игры "Лабиринт" */
     canvas {
-      border: 3px solid #ff6347;
+      border: 3px solid #8A2BE2;
       margin-bottom: 20px;
       background: #fdfdfd;
       box-shadow: 0 4px 8px rgba(0,0,0,0.2);
@@ -361,7 +360,7 @@
         piece.style.order = pos;
         // Задаём картинку – файл лежит рядом с index.html
         piece.style.backgroundImage = 'url("1644845170_28-fikiwiki-com-p-nyashnie-kotiki-milie-kartinki-29.jpg")';
-        // Вычисляем позицию фрагмента
+        // Вычисляем позицию фрагмента по сетке 4x4
         const correctRow = Math.floor(i / cols);
         const correctCol = i % cols;
         piece.style.backgroundPosition = `-${correctCol * (300 / cols)}px -${correctRow * (300 / rows)}px`;
@@ -505,7 +504,7 @@
       const cellHeight = ctx.canvas.height / maze.rows;
       ctx.fillStyle = '#fdfdfd';
       ctx.fillRect(0, 0, ctx.canvas.width, ctx.canvas.height);
-      ctx.strokeStyle = '#ff6347';
+      ctx.strokeStyle = '#8A2BE2';
       ctx.lineWidth = 4;
       for (let y = 0; y < maze.rows; y++) {
         for (let x = 0; x < maze.cols; x++) {
@@ -521,7 +520,7 @@
     function drawPlayer(ctx, player) {
       const cellWidth = ctx.canvas.width / 10;
       const cellHeight = ctx.canvas.height / 10;
-      ctx.fillStyle = '#ff6347';
+      ctx.fillStyle = '#8A2BE2';
       ctx.beginPath();
       ctx.arc(player.x * cellWidth + cellWidth / 2, player.y * cellHeight + cellHeight / 2, Math.min(cellWidth, cellHeight) / 4, 0, Math.PI * 2);
       ctx.fill();
@@ -564,7 +563,7 @@
       const card = e.target;
       if (card.classList.contains('flipped')) return;
       card.classList.add('flipped');
-      // Используем разные сердечки в зависимости от значения карточки
+      // Выбираем сердечко из массива, чтобы карточки отличались
       card.textContent = heartEmojis[parseInt(card.dataset.value) % heartEmojis.length];
       if (!window.memoryState.firstCard) {
         window.memoryState.firstCard = card;
