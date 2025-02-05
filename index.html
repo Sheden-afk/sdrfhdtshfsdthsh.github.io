@@ -356,7 +356,8 @@
         piece.classList.add('puzzle-piece');
         // Сохраняем правильный индекс в data-атрибуте
         piece.dataset.correctIndex = i;
-        // Назначаем случайное начальное положение (order)
+        // Сохраняем текущее положение в data-атрибуте и обновляем стиль order
+        piece.dataset.order = pos;
         piece.style.order = pos;
         // Задаём картинку – файл лежит рядом с index.html
         piece.style.backgroundImage = 'url("1644845170_28-fikiwiki-com-p-nyashnie-kotiki-milie-kartinki-29.jpg")';
@@ -374,7 +375,8 @@
       gameCompletion.puzzle = false;
     }
     function puzzleDragStart(e) {
-      e.dataTransfer.setData('text/plain', e.target.style.order);
+      // Используем data-order вместо style.order
+      e.dataTransfer.setData('text/plain', e.target.dataset.order);
       e.dataTransfer.effectAllowed = 'move';
     }
     function puzzleDragOver(e) {
@@ -384,16 +386,24 @@
     function puzzleDrop(e) {
       e.preventDefault();
       const draggedOrder = e.dataTransfer.getData('text/plain');
-      const targetOrder = e.target.style.order;
-      const draggedElem = document.querySelector(`.puzzle-piece[style*="order: ${draggedOrder}"]`);
-      if (draggedElem) { draggedElem.style.order = targetOrder; }
+      const targetOrder = e.target.dataset.order;
+      
+      // Находим элемент, у которого data-order равен draggedOrder
+      const draggedElem = document.querySelector(`.puzzle-piece[data-order="${draggedOrder}"]`);
+      if (draggedElem) {
+        // Меняем значения data-order и обновляем стиль order
+        draggedElem.dataset.order = targetOrder;
+        draggedElem.style.order = targetOrder;
+      }
+      // Обновляем data-order и стиль order для цели сброса
+      e.target.dataset.order = draggedOrder;
       e.target.style.order = draggedOrder;
     }
     function checkPuzzleCompletion() {
       const pieces = document.querySelectorAll('.puzzle-piece');
       let correct = 0;
       pieces.forEach(piece => {
-        if (parseInt(piece.style.order) === parseInt(piece.dataset.correctIndex)) {
+        if (parseInt(piece.dataset.order) === parseInt(piece.dataset.correctIndex)) {
           correct++;
         }
       });
@@ -563,7 +573,7 @@
       const card = e.target;
       if (card.classList.contains('flipped')) return;
       card.classList.add('flipped');
-      // Выбираем сердечко из массива, чтобы карточки отличались
+      // Используем разные сердечки в зависимости от значения карточки
       card.textContent = heartEmojis[parseInt(card.dataset.value) % heartEmojis.length];
       if (!window.memoryState.firstCard) {
         window.memoryState.firstCard = card;
