@@ -2,44 +2,48 @@
 <html lang="ru">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Телеграм Мини-Квест</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Романтический Мини-Квест</title>
   <!-- Пиксельный шрифт -->
   <link href="https://fonts.googleapis.com/css?family=Press+Start+2P" rel="stylesheet">
   <!-- Telegram Web App API -->
   <script src="https://telegram.org/js/telegram-web-app.js"></script>
   <style>
-    /* Общие стили */
+    /* Общий фон и базовые стили */
     body {
       margin: 0;
       padding: 0;
-      background: #1e1e1e;
-      color: #fff;
       font-family: 'Press Start 2P', cursive;
+      background: linear-gradient(135deg, #1e1e1e, #d6336c);
+      color: #fff;
       text-align: center;
+      overflow-x: hidden;
     }
+    /* Общий контейнер для экранов */
+    .screen {
+      padding: 20px;
+      min-height: 100vh;
+      box-sizing: border-box;
+    }
+    /* Стили для главного контейнера */
     .container {
       max-width: 600px;
-      margin: 20px auto;
+      margin: auto;
+      background: rgba(0, 0, 0, 0.5);
       padding: 20px;
-      background: #292929;
       border-radius: 10px;
-      box-shadow: 0 0 10px rgba(0,0,0,0.5);
-    }
-    h1 {
-      margin-bottom: 20px;
-      font-size: 24px;
+      box-shadow: 0 0 20px rgba(0,0,0,0.7);
     }
     /* Стили для вкладок */
     .tabs {
       display: flex;
-      justify-content: space-around;
+      justify-content: center;
       margin-bottom: 20px;
     }
     .tab {
       flex: 1;
       margin: 0 10px;
-      padding: 10px;
+      padding: 15px;
       background: #333;
       border-radius: 5px;
       cursor: pointer;
@@ -52,13 +56,9 @@
       background: #555;
       cursor: default;
     }
-    /* Стили для контейнера игры */
-    #game-container {
-      min-height: 200px;
-      background: #1e1e1e;
-      padding: 20px;
-      border: 2px solid #444;
-      border-radius: 5px;
+    /* Стили для заголовков */
+    h1, h2 {
+      margin-bottom: 20px;
     }
     /* Стили для кнопок */
     button {
@@ -67,15 +67,15 @@
       background: #4caf50;
       border: none;
       border-radius: 5px;
+      cursor: pointer;
       font-size: 14px;
       color: #fff;
-      cursor: pointer;
       transition: background 0.3s;
     }
     button:hover {
       background: #45a049;
     }
-    /* Стили для input */
+    /* Стили для полей ввода */
     input[type="text"] {
       padding: 8px;
       font-size: 14px;
@@ -86,22 +86,79 @@
       width: 80%;
       margin-top: 10px;
     }
+    /* Стили финального экрана */
+    #assembled-photo {
+      max-width: 100%;
+      border: 3px solid #fff;
+      border-radius: 10px;
+      margin-top: 20px;
+    }
+    /* Контейнер для анимации сердечек */
+    #heart-container {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      overflow: hidden;
+    }
+    .heart {
+      position: absolute;
+      color: #ff4d4d;
+      font-size: 24px;
+      opacity: 0.8;
+      animation: float 4s linear infinite;
+    }
+    @keyframes float {
+      0% {
+        transform: translateY(0) scale(1);
+        opacity: 0.8;
+      }
+      100% {
+        transform: translateY(-200px) scale(1.5);
+        opacity: 0;
+      }
+    }
   </style>
 </head>
 <body>
-  <div class="container">
-    <h1>Телеграм Мини-Квест</h1>
-    <div class="tabs">
-      <div id="tab-7march" class="tab">7 марта</div>
-      <div id="tab-14feb" class="tab">14 февраля</div>
-    </div>
-    <div id="game-container">
-      <p>Выберите вкладку, чтобы начать игру</p>
+  <!-- Экран Главной страницы -->
+  <div id="screen-home" class="screen">
+    <div class="container">
+      <h1>Романтический Квест</h1>
+      <div class="tabs">
+        <div id="tab-7march" class="tab">7 марта</div>
+        <div id="tab-14feb" class="tab">14 февраля</div>
+      </div>
+      <p>Выберите дату, чтобы начать незабываемое приключение!</p>
     </div>
   </div>
 
+  <!-- Экран игры (квеста) -->
+  <div id="screen-game" class="screen" style="display: none;">
+    <div class="container">
+      <h2>Романтический Квест</h2>
+      <div id="puzzle-container">
+        <!-- Здесь будут появляться головоломки -->
+      </div>
+    </div>
+  </div>
+
+  <!-- Финальный экран (собранная фотография и анимация сердечек) -->
+  <div id="screen-final" class="screen" style="display: none;">
+    <div class="container">
+      <h2>Поздравляем!</h2>
+      <p>Вы собрали всю фотографию!</p>
+      <!-- Здесь можно вставить свою фотографию -->
+      <img id="assembled-photo" src="https://via.placeholder.com/400x300.png?text=Assembled+Photo" alt="Собранная фотография">
+    </div>
+    <!-- Контейнер для анимации сердечек -->
+    <div id="heart-container"></div>
+  </div>
+
   <script>
-    // Инициализация Telegram Web App
+    // Инициализируем Telegram Web App
     const tg = window.Telegram.WebApp;
     tg.expand();
 
@@ -109,94 +166,105 @@
       const tab7March = document.getElementById("tab-7march");
       const tab14Feb = document.getElementById("tab-14feb");
 
-      // Для теста: ставим даты разблокировки в прошлом (например, 2023 год)
-      const unlockDate7March = new Date("2023-03-07");
-      const unlockDate14Feb = new Date("2023-02-14");
-      const currentDate = new Date();
+      // Для демонстрации обе вкладки активны (используем прошедшие даты)
+      // Если хотите реализовать блокировку по дате, добавьте проверки с new Date()
 
-      // Если текущая дата позже дат разблокировки, вкладки остаются активными
-      if (currentDate < unlockDate7March) {
-        tab7March.innerHTML = "🔒 Откроется 7 марта";
-        tab7March.classList.add("disabled");
-      }
-      if (currentDate < unlockDate14Feb) {
-        tab14Feb.innerHTML = "🔒 Откроется 14 февраля";
-        tab14Feb.classList.add("disabled");
-      }
-
-      // Назначаем обработчики событий, если вкладка активна
-      if (!tab7March.classList.contains("disabled")) {
-        tab7March.addEventListener("click", () => startGame('7march'));
-      }
-      if (!tab14Feb.classList.contains("disabled")) {
-        tab14Feb.addEventListener("click", () => startGame('14feb'));
-      }
+      // Обработчики нажатий
+      tab7March.addEventListener("click", () => startGameFlow("7march"));
+      tab14Feb.addEventListener("click", () => startGameFlow("14feb"));
     });
 
-    // Запуск игры в зависимости от выбранной вкладки
-    function startGame(tab) {
-      const gameContainer = document.getElementById("game-container");
-      if (tab === '7march') {
-        gameContainer.innerHTML = "<p>Начинаем квест! Первая головоломка загружается...</p>";
+    // Функция переключения экранов
+    function showScreen(screenId) {
+      document.querySelectorAll('.screen').forEach(screen => {
+        screen.style.display = "none";
+      });
+      document.getElementById(screenId).style.display = "block";
+    }
+
+    // Запуск квеста в зависимости от выбранной вкладки
+    function startGameFlow(tab) {
+      if (tab === "7march") {
+        showScreen("screen-game");
         loadPuzzle(1);
-      } else if (tab === '14feb') {
-        gameContainer.innerHTML = "<p>Сюрприз для 14 февраля! Здесь будет что-то особенное.</p>";
-        // Здесь можно добавить дополнительный функционал для 14 февраля
+      } else if (tab === "14feb") {
+        // Для 14 февраля сразу показываем финальный экран с романтическим сюрпризом
+        showScreen("screen-final");
+        startHeartAnimation();
       }
     }
 
     // Загрузка головоломок по уровням
     function loadPuzzle(level) {
-      const gameContainer = document.getElementById("game-container");
-      switch(level) {
+      const container = document.getElementById("puzzle-container");
+      switch (level) {
         case 1:
-          gameContainer.innerHTML = `
-            <p>Головоломка 1: Разгадайте шифр!</p>
-            <p>Подсказка: Введите слово, связанное с этим мессенджером.</p>
-            <input id="cipher-input" type="text" placeholder="Ваш ответ">
+          container.innerHTML = `
+            <p>Головоломка 1:</p>
+            <p>Введи слово, которое объединяет нас</p>
+            <input type="text" id="answer1" placeholder="Ваш ответ">
             <br>
-            <button onclick="checkCipher()">Ответить</button>
+            <button onclick="checkPuzzle1()">Проверить</button>
           `;
           break;
         case 2:
-          gameContainer.innerHTML = `
-            <p>Головоломка 2: Найдите правильный путь в лабиринте!</p>
-            <p>(Просто нажмите кнопку, чтобы продолжить.)</p>
-            <button onclick="nextLevel(3)">Далее</button>
+          container.innerHTML = `
+            <p>Головоломка 2:</p>
+            <p>Найдите правильный путь – нажмите, если чувствуете верное решение</p>
+            <button onclick="nextPuzzle(3)">Далее</button>
           `;
           break;
         case 3:
-          gameContainer.innerHTML = `
-            <p>Головоломка 3: Соберите пазл!</p>
-            <p>(Кликните на кнопку, чтобы собрать пазл.)</p>
+          container.innerHTML = `
+            <p>Головоломка 3:</p>
+            <p>Соберите пазл – нажмите, чтобы получить последнюю часть</p>
             <button onclick="finishGame()">Собрать пазл</button>
           `;
           break;
         default:
-          gameContainer.innerHTML = "<p>Квест завершён.</p>";
+          container.innerHTML = `<p>Квест завершён</p>`;
       }
     }
 
-    // Проверка ответа для Головоломки 1
-    function checkCipher() {
-      const input = document.getElementById("cipher-input").value.toLowerCase().trim();
-      // Пример правильного ответа: "telegram"
-      if (input === "telegram") {
-        nextLevel(2);
+    // Проверка ответа для головоломки 1
+    function checkPuzzle1() {
+      const answer = document.getElementById("answer1").value.toLowerCase().trim();
+      // Правильный ответ: «любовь»
+      if (answer === "любовь") {
+        nextPuzzle(2);
       } else {
-        alert("Неправильно, попробуйте снова!");
+        alert("Неверно! Попробуйте ещё раз.");
       }
     }
 
-    // Переход к следующему уровню
-    function nextLevel(level) {
+    // Переход к следующей головоломке
+    function nextPuzzle(level) {
       loadPuzzle(level);
     }
 
-    // Завершение квеста
+    // Завершение квеста — переход к финальному экрану
     function finishGame() {
-      const gameContainer = document.getElementById("game-container");
-      gameContainer.innerHTML = "<p>Поздравляем! Вы собрали всю фотографию 🎉</p>";
+      showScreen("screen-final");
+      startHeartAnimation();
+    }
+
+    // Функция для анимации сердечек
+    function startHeartAnimation() {
+      const heartContainer = document.getElementById("heart-container");
+      heartContainer.innerHTML = ""; // Очистка предыдущих сердечек
+      // Функция создания одного сердечка
+      const createHeart = () => {
+        const heart = document.createElement("div");
+        heart.className = "heart";
+        heart.style.left = Math.random() * 100 + "vw"; // случайное положение по горизонтали
+        heart.style.animationDuration = 3 + Math.random() * 3 + "s"; // случайная длительность анимации
+        heart.textContent = "❤";
+        heartContainer.appendChild(heart);
+        // Удаляем сердце по окончании анимации (примерно через 6 секунд)
+        setTimeout(() => heart.remove(), 6000);
+      };
+      // Каждые 500 мс создаём новое сердце
+      setInterval(createHeart, 500);
     }
   </script>
 </body>
