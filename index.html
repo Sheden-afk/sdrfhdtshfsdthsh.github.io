@@ -62,17 +62,6 @@
     button:hover {
       transform: scale(1.1);
     }
-
-    @keyframes floatingHeart {
-      0% { transform: translateY(0) scale(1); opacity: 1; }
-      100% { transform: translateY(-100px) scale(1.5); opacity: 0; }
-    }
-    .heart {
-      position: absolute;
-      color: #ff4081;
-      font-size: 16px;
-      animation: floatingHeart 2s linear infinite;
-    }
   </style>
 </head>
 <body>
@@ -86,20 +75,39 @@
 
   <div id="categoryScreen" class="screen">
     <div class="container">
-      <h1>Выбери категорию</h1>
-      <p>Выберите задания по интересам</p>
-      <button id="romanticTasks">Романтика</button>
-      <button id="funTasks">Веселье</button>
-      <button id="challengeTasks">Испытания</button>
+      <h1>Выбери игру</h1>
+      <p>Выбери, что хочешь пройти</p>
+      <button id="puzzleGame">Собери пазл</button>
+      <button id="quizGame">Викторина</button>
+      <button id="mazeGame">Лабиринт</button>
       <button id="backToMenu">Назад</button>
     </div>
   </div>
 
-  <div id="taskScreen" class="screen">
+  <div id="puzzleScreen" class="screen">
     <div class="container">
-      <h1>Твое задание</h1>
-      <p id="taskText">Выберите категорию, чтобы начать</p>
-      <button id="nextTask">Новое задание</button>
+      <h1>Собери пазл</h1>
+      <p>Перетащи фрагменты в нужные места</p>
+      <button id="backToCategories">Назад</button>
+    </div>
+  </div>
+
+  <div id="quizScreen" class="screen">
+    <div class="container">
+      <h1>Викторина</h1>
+      <p id="quizQuestion">Здесь будет вопрос</p>
+      <button id="quizOption1">Ответ 1</button>
+      <button id="quizOption2">Ответ 2</button>
+      <button id="quizOption3">Ответ 3</button>
+      <button id="backToCategories">Назад</button>
+    </div>
+  </div>
+
+  <div id="mazeScreen" class="screen">
+    <div class="container">
+      <h1>Лабиринт</h1>
+      <p>Пройди путь к сердцу!</p>
+      <canvas id="mazeCanvas" width="300" height="300" style="background:#fff;"></canvas>
       <button id="backToCategories">Назад</button>
     </div>
   </div>
@@ -110,73 +118,51 @@
 
     const mainMenu = document.getElementById("mainMenu");
     const categoryScreen = document.getElementById("categoryScreen");
-    const taskScreen = document.getElementById("taskScreen");
-    
+    const puzzleScreen = document.getElementById("puzzleScreen");
+    const quizScreen = document.getElementById("quizScreen");
+    const mazeScreen = document.getElementById("mazeScreen");
+
     const startButton = document.getElementById("startButton");
     const backToMenu = document.getElementById("backToMenu");
-    const backToCategories = document.getElementById("backToCategories");
-    
-    const romanticTasks = document.getElementById("romanticTasks");
-    const funTasks = document.getElementById("funTasks");
-    const challengeTasks = document.getElementById("challengeTasks");
-    
-    const taskText = document.getElementById("taskText");
-    const nextTask = document.getElementById("nextTask");
+    const backToCategories = document.querySelectorAll("#backToCategories");
 
-    const tasks = {
-      romantic: [
-        "Скажи партнеру 3 вещи, которые ты в нем любишь ❤️",
-        "Сделайте совместное фото 📸",
-        "Проведите 10 минут, глядя друг другу в глаза 💕"
-      ],
-      fun: [
-        "Изобрази животное, а партнер угадает 🦁",
-        "Расскажите самую смешную историю 😂",
-        "Испеките что-то вместе 🍪"
-      ],
-      challenge: [
-        "Выдержите 10 секунд крепкого объятия 🤗",
-        "Поцелуй партнера в 5 разных мест 😘",
-        "Сыграйте в камень-ножницы-бумага 🔥"
-      ]
-    };
-
-    let currentCategory = "";
+    const puzzleGame = document.getElementById("puzzleGame");
+    const quizGame = document.getElementById("quizGame");
+    const mazeGame = document.getElementById("mazeGame");
 
     function showScreen(screen) {
       document.querySelectorAll(".screen").forEach(s => s.classList.remove("active"));
       screen.classList.add("active");
     }
 
-    romanticTasks.addEventListener("click", () => {
-      currentCategory = "romantic";
-      showScreen(taskScreen);
-      showRandomTask();
-    });
-
-    funTasks.addEventListener("click", () => {
-      currentCategory = "fun";
-      showScreen(taskScreen);
-      showRandomTask();
-    });
-
-    challengeTasks.addEventListener("click", () => {
-      currentCategory = "challenge";
-      showScreen(taskScreen);
-      showRandomTask();
-    });
-
-    function showRandomTask() {
-      if (currentCategory) {
-        let taskList = tasks[currentCategory];
-        taskText.textContent = taskList[Math.floor(Math.random() * taskList.length)];
-      }
-    }
-
-    nextTask.addEventListener("click", showRandomTask);
     startButton.addEventListener("click", () => showScreen(categoryScreen));
     backToMenu.addEventListener("click", () => showScreen(mainMenu));
-    backToCategories.addEventListener("click", () => showScreen(categoryScreen));
+    backToCategories.forEach(btn => btn.addEventListener("click", () => showScreen(categoryScreen)));
+
+    puzzleGame.addEventListener("click", () => showScreen(puzzleScreen));
+    quizGame.addEventListener("click", () => showScreen(quizScreen));
+    mazeGame.addEventListener("click", () => showScreen(mazeScreen));
+
+    // Викторина
+    const quizQuestions = [
+      { q: "Какой цвет символизирует любовь?", a: ["Красный", "Синий", "Желтый"], correct: 0 },
+      { q: "Что является символом любви?", a: ["Роза", "Тюльпан", "Лилия"], correct: 0 }
+    ];
+
+    let currentQuiz = 0;
+    document.getElementById("quizQuestion").textContent = quizQuestions[currentQuiz].q;
+    document.getElementById("quizOption1").textContent = quizQuestions[currentQuiz].a[0];
+    document.getElementById("quizOption2").textContent = quizQuestions[currentQuiz].a[1];
+    document.getElementById("quizOption3").textContent = quizQuestions[currentQuiz].a[2];
+
+    function checkAnswer(index) {
+      alert(index === quizQuestions[currentQuiz].correct ? "Правильно!" : "Неверно!");
+      currentQuiz = (currentQuiz + 1) % quizQuestions.length;
+    }
+
+    document.getElementById("quizOption1").addEventListener("click", () => checkAnswer(0));
+    document.getElementById("quizOption2").addEventListener("click", () => checkAnswer(1));
+    document.getElementById("quizOption3").addEventListener("click", () => checkAnswer(2));
   </script>
 </body>
 </html>
