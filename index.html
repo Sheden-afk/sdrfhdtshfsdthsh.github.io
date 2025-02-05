@@ -59,30 +59,19 @@
       0%, 100% { opacity: 0; transform: scale(0.5); }
       50% { opacity: 1; transform: scale(1.2); }
     }
-    
-    /* Экран блокировки */
-    #lockScreen {
-      display: none;
-      width: 100%;
-      height: 100vh;
-      background: linear-gradient(135deg, #8A2BE2, #000000);
-      position: absolute;
+    /* Экран таймера (если дата ещё не наступила) */
+    #timerCanvas {
+      position: fixed;
       top: 0;
       left: 0;
-      z-index: 100;
-      color: #fff;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      text-align: center;
-      padding: 20px;
+      width: 100vw;
+      height: 100vh;
+      z-index: 200;
+      background: linear-gradient(135deg, #8A2BE2, #000000);
+      display: none; /* по умолчанию скрыт */
     }
-    #lockScreen h1 { font-size: 28px; margin-bottom: 20px; }
-    #lockScreen p { font-size: 20px; margin-bottom: 20px; }
-    #countdownTimer { font-size: 24px; font-weight: bold; }
     
-    /* Экран приложения */
+    /* Остальные экраны приложения */
     .screen {
       display: none;
       width: 100%;
@@ -254,12 +243,8 @@
   <!-- Фоновая анимация -->
   <div id="bgAnimation"></div>
   
-  <!-- Экран блокировки -->
-  <div id="lockScreen">
-    <h1>Приложение скоро откроется</h1>
-    <p>Доступ будет открыт с 7 февраля (МСК)</p>
-    <p>Осталось: <span id="countdownTimer"></span></p>
-  </div>
+  <!-- Экран таймера (перед разблокировкой) -->
+  <canvas id="timerCanvas"></canvas>
   
   <!-- Диалоги -->
   <div id="dialogue1" class="screen">
@@ -366,8 +351,9 @@
     const tg = window.Telegram.WebApp;
     tg.expand();
     
-    // Задаём дату разблокировки (МСК). Для тестирования можно изменить на ближайшую дату, например:
-    // const unlockDate = new Date(Date.now() + 60000); // через 1 минуту
+    /* Задаём дату разблокировки (МСК).
+       Для тестирования можно временно задать, например:
+       const unlockDate = new Date(Date.now() + 60000); // через 1 минуту */
     const unlockDate = new Date("2023-02-07T00:00:00+03:00");
     
     let gameCompletion = { puzzle: false, quiz: false, maze: false, memory: false };
@@ -379,10 +365,9 @@
     // Для мобильного пазла – выбор двумя тапами
     let selectedPuzzlePiece = null;
     
-    // Фоновая анимация: плавающие сердечки и искры
+    /* Фоновая анимация: плавающие сердечки и искры */
     function startBgAnimation() {
       const bg = document.getElementById('bgAnimation');
-      // Плавающие сердечки
       for (let i = 0; i < 30; i++) {
         const heart = document.createElement('div');
         heart.classList.add('bg-heart');
@@ -393,7 +378,6 @@
         heart.innerText = '❤️';
         bg.appendChild(heart);
       }
-      // Искры
       for (let i = 0; i < 20; i++) {
         const sparkle = document.createElement('div');
         sparkle.classList.add('bg-sparkle');
@@ -405,7 +389,7 @@
     }
     startBgAnimation();
     
-    // Эффект перехода с сердцами
+    /* Эффект перехода с сердцами */
     function heartTransition(callback) {
       const overlay = document.getElementById('heartTransition');
       overlay.innerHTML = '';
@@ -448,36 +432,78 @@
       document.getElementById('progressBar').style.width = percent + '%';
     }
     
-    /* Таймер обратного отсчёта и проверка даты разблокировки */
-    function checkUnlock() {
+    /* Новый экран таймера на canvas.
+       Если московское время (UTC+3) меньше unlockDate, то отображается canvas, на котором каждые 200 мс отрисовывается обратный отсчёт.
+       После наступления unlockDate canvas скрывается, и запускается приложение. */
+    const timerCanvas = document.getElementById('timerCanvas');
+    const timerCtx = timerCanvas.getContext('2d');
+    // Устанавливаем размеры canvas равными размеру окна
+    timerCanvas.width = window.innerWidth;
+    timerCanvas.height = window.innerHeight;
+    
+    function drawTimer() {
+      // Вычисляем московское время: UTC + 180 минут
       const now = new Date();
-      if (now < unlockDate) {
-        document.getElementById('lockScreen').style.display = "flex";
-        startCountdown();
+      const moscowTime = new Date(now.getTime() + now.getTimezoneOffset()*60000 + 180*60000);
+      const diff = unlockDate - moscowTime;
+      
+      // Очистка canvas
+      timerCtx.clearRect(0, 0, timerCanvas.width, timerCanvas.height);
+      
+      // Задаем фон (можно оставить прозрачным или задать градиент)
+      timerCtx.fillStyle = "rgba(0, 0, 0, 0.8)";
+      timerCtx.fillRect(0, 0, timerCanvas.width, timerCanvas.height);
+      
+      // Если время ещё не наступило, отрисовываем обратный отсчёт
+      if (diff > 0) {
+        const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+        const hours = Math.floor((diff / (1000 * 60 * 60)) % 24);
+        const minutes = Math.floor((diff / (1000 * 60)) % 60);
+        const seconds = Math.floor((diff / 1000) % 60);
+        const countdownText = `${days} дн ${hours} ч ${minutes} м ${seconds} с`;
+        // Отрисовываем основной текст
+        timerCtx.fillStyle = "#FFFFFF";
+        timerCtx.font = "bold 36px Roboto";
+        timerCtx.textAlign = "center";
+        timerCtx.fillText("Ожидай, всё станет ясно 7 февраля!", timerCanvas.width/2, timerCanvas.height/2 - 40);
+        timerCtx.font = "bold 48px Roboto";
+        timerCtx.fillText(countdownText, timerCanvas.width/2, timerCanvas.height/2 + 20);
       } else {
-        document.getElementById('lockScreen').style.display = "none";
+        // Если время наступило, скрываем canvas
+        timerCanvas.style.display = "none";
+      }
+    }
+    
+    let timerInterval;
+    function startTimer() {
+      timerCanvas.style.display = "block";
+      drawTimer();
+      timerInterval = setInterval(() => {
+        drawTimer();
+        // Если время наступило, остановить таймер и запустить приложение
+        const now = new Date();
+        const moscowTime = new Date(now.getTime() + now.getTimezoneOffset()*60000 + 180*60000);
+        if (moscowTime >= unlockDate) {
+          clearInterval(timerInterval);
+          timerCanvas.style.display = "none";
+          showScreen('dialogue1');
+        }
+      }, 200);
+    }
+    
+    /* При загрузке страницы проверяем дату.
+       Если московское время меньше unlockDate, запускаем таймер, иначе сразу показываем приложение. */
+    function checkTimeForTimer() {
+      const now = new Date();
+      const moscowTime = new Date(now.getTime() + now.getTimezoneOffset()*60000 + 180*60000);
+      if (moscowTime < unlockDate) {
+        startTimer();
+      } else {
         showScreen('dialogue1');
       }
     }
-    function startCountdown() {
-      const timerEl = document.getElementById('countdownTimer');
-      const interval = setInterval(() => {
-        const now = new Date();
-        const diff = unlockDate - now;
-        if (diff <= 0) {
-          clearInterval(interval);
-          document.getElementById('lockScreen').style.display = "none";
-          showScreen('dialogue1');
-        } else {
-          const days = Math.floor(diff / (1000 * 60 * 60 * 24));
-          const hours = Math.floor((diff / (1000 * 60 * 60)) % 24);
-          const minutes = Math.floor((diff / (1000 * 60)) % 60);
-          const seconds = Math.floor((diff / 1000) % 60);
-          timerEl.innerText = `${days} дн ${hours} ч ${minutes} м ${seconds} с`;
-        }
-      }, 1000);
-    }
     
+    // Остальной код приложения (диалоги, игры, лабиринт, память) остается без изменений.
     // Диалоги
     document.getElementById('dialogue1Btn').addEventListener('click', () => { showScreen('dialogue2'); });
     document.getElementById('dialogue2Btn').addEventListener('click', () => { showScreen('dialogue3'); });
@@ -715,20 +741,20 @@
         }
       }
     }
-    // Функция рисования игрока (шарика)
+    
+    /* Функция рисования игрока (шарика) */
     function drawPlayer(ctx, player) {
       const cellWidth = ctx.canvas.width / 10;
       const cellHeight = ctx.canvas.height / 10;
-      // Задаём тень до рисования
       ctx.shadowColor = 'rgba(0, 0, 0, 0.3)';
       ctx.shadowBlur = 10;
       ctx.fillStyle = '#8A2BE2';
       ctx.beginPath();
       ctx.arc(player.x * cellWidth + cellWidth / 2, player.y * cellHeight + cellHeight / 2, Math.min(cellWidth, cellHeight) / 4, 0, Math.PI * 2);
       ctx.fill();
-      ctx.shadowBlur = 0; // сбрасываем тень
+      ctx.shadowBlur = 0; // сброс тени
     }
-    // Функция рисования выхода лабиринта (белое сердечко)
+    /* Функция рисования выхода лабиринта (белое сердечко) */
     function drawExit(ctx, maze) {
       const cellWidth = ctx.canvas.width / maze.cols;
       const cellHeight = ctx.canvas.height / maze.rows;
@@ -899,38 +925,64 @@
       }
     }
     
-    /* Начало работы: проверка даты разблокировки */
-    function checkUnlock() {
+    /* Начало работы: проверка московского времени и запуск таймера, если дата меньше 7 февраля */
+    function checkTimeForTimer() {
       const now = new Date();
-      if (now < unlockDate) {
-        document.getElementById('lockScreen').style.display = "flex";
-        startCountdown();
+      // Рассчитываем московское время: UTC + 180 минут
+      const moscowTime = new Date(now.getTime() + now.getTimezoneOffset()*60000 + 180*60000);
+      if (moscowTime < unlockDate) {
+        // Если московское время меньше unlockDate, показываем canvas таймера
+        timerCanvas.style.display = "block";
+        startTimer();
       } else {
-        document.getElementById('lockScreen').style.display = "none";
+        // Если время наступило, скрываем canvas и запускаем приложение
+        timerCanvas.style.display = "none";
         showScreen('dialogue1');
       }
     }
-    function startCountdown() {
-      const timerEl = document.getElementById('countdownTimer');
+    
+    function startTimer() {
+      drawTimer(); // первый вызов для отображения сразу
       const interval = setInterval(() => {
+        drawTimer();
         const now = new Date();
-        const diff = unlockDate - now;
-        if (diff <= 0) {
+        const moscowTime = new Date(now.getTime() + now.getTimezoneOffset()*60000 + 180*60000);
+        if (moscowTime >= unlockDate) {
           clearInterval(interval);
-          document.getElementById('lockScreen').style.display = "none";
+          timerCanvas.style.display = "none";
           showScreen('dialogue1');
-        } else {
-          const days = Math.floor(diff / (1000 * 60 * 60 * 24));
-          const hours = Math.floor((diff / (1000 * 60 * 60)) % 24);
-          const minutes = Math.floor((diff / (1000 * 60)) % 60);
-          const seconds = Math.floor((diff / 1000) % 60);
-          timerEl.innerText = `${days} дн ${hours} ч ${minutes} м ${seconds} с`;
         }
-      }, 1000);
+      }, 200);
     }
     
-    // Запускаем проверку разблокировки после загрузки страницы
-    window.onload = checkUnlock;
+    // Функция отрисовки таймера на canvas
+    function drawTimer() {
+      const now = new Date();
+      const moscowTime = new Date(now.getTime() + now.getTimezoneOffset()*60000 + 180*60000);
+      const diff = unlockDate - moscowTime;
+      // Очистка canvas
+      timerCtx.clearRect(0, 0, timerCanvas.width, timerCanvas.height);
+      // Фон
+      timerCtx.fillStyle = "rgba(0, 0, 0, 0.8)";
+      timerCtx.fillRect(0, 0, timerCanvas.width, timerCanvas.height);
+      timerCtx.fillStyle = "#FFFFFF";
+      timerCtx.textAlign = "center";
+      // Текст заголовка
+      timerCtx.font = "bold 36px Roboto";
+      timerCtx.fillText("Ожидай, всё станет ясно 7 февраля!", timerCanvas.width/2, timerCanvas.height/2 - 40);
+      if (diff > 0) {
+        const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+        const hours = Math.floor((diff / (1000 * 60 * 60)) % 24);
+        const minutes = Math.floor((diff / (1000 * 60)) % 60);
+        const seconds = Math.floor((diff / 1000) % 60);
+        const countdownText = `${days} дн ${hours} ч ${minutes} м ${seconds} с`;
+        timerCtx.font = "bold 48px Roboto";
+        timerCtx.fillText(countdownText, timerCanvas.width/2, timerCanvas.height/2 + 20);
+      }
+    }
+    
+    // Запуск проверки времени после загрузки страницы
+    window.onload = checkTimeForTimer;
   </script>
 </body>
 </html>
