@@ -1,102 +1,145 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Telegram Mini App</title>
-    <script src="https://telegram.org/js/telegram-web-app.js"></script>
-    <style>
-        body {
-            background-color: #1e1e1e;
-            color: #ffffff;
-            font-family: Arial, sans-serif;
-            text-align: center;
-            padding: 20px;
-        }
-        .container {
-            max-width: 400px;
-            margin: auto;
-            background: #292929;
-            padding: 20px;
-            border-radius: 10px;
-        }
-        button {
-            padding: 10px 20px;
-            font-size: 16px;
-            border: none;
-            cursor: pointer;
-            border-radius: 5px;
-        }
-        .start-btn {
-            background-color: #4CAF50;
-            color: white;
-        }
-    </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Телеграм Мини-Квест</title>
+  <!-- Пиксельный шрифт -->
+  <link href="https://fonts.googleapis.com/css?family=Press+Start+2P" rel="stylesheet">
+  <!-- Telegram Web App API -->
+  <script src="https://telegram.org/js/telegram-web-app.js"></script>
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      background-color: #1e1e1e;
+      color: #fff;
+      font-family: 'Press Start 2P', cursive;
+      text-align: center;
+    }
+    .container {
+      max-width: 500px;
+      margin: auto;
+      padding: 20px;
+    }
+    .tabs {
+      display: flex;
+      justify-content: space-around;
+      margin-bottom: 20px;
+    }
+    .tab {
+      flex: 1;
+      padding: 10px;
+      background: #333;
+      margin: 0 5px;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+    .tab.disabled {
+      background: #555;
+      pointer-events: none;
+    }
+    button {
+      padding: 10px 20px;
+      background: #4CAF50;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      font-size: 16px;
+      color: #fff;
+      margin-top: 15px;
+    }
+    button:hover {
+      background: #45a049;
+    }
+  </style>
 </head>
 <body>
-    <div class="container">
-        <h1>Привет!</h1>
-        <p>Это мини-приложение для Telegram.</p>
-        <button class="start-btn" onclick="startGame()">Начать квест</button>
-        <div id="game-output"></div>
+  <div class="container">
+    <h1>Телеграм Мини-Квест</h1>
+    <div class="tabs">
+      <div id="tab-7march" class="tab">7 марта</div>
+      <div id="tab-14feb" class="tab">14 февраля</div>
     </div>
+    <div id="game-container">
+      <p>Выберите вкладку, когда она станет доступной</p>
+    </div>
+  </div>
 
-<script>
+  <script>
+    // Инициализируем Telegram Web App
     const tg = window.Telegram.WebApp;
-    tg.expand(); // Разворачиваем Web App
+    tg.expand();
 
     document.addEventListener("DOMContentLoaded", () => {
-        const tab7March = document.getElementById("tab-7march");
-        const tab14Feb = document.getElementById("tab-14feb");
-        const gameContainer = document.getElementById("game-container");
+      const tab7March = document.getElementById("tab-7march");
+      const tab14Feb = document.getElementById("tab-14feb");
+      const gameContainer = document.getElementById("game-container");
 
-        const currentDate = new Date();
-        const unlockDate7March = new Date("2025-03-07");
-        const unlockDate14Feb = new Date("2025-02-14");
+      const currentDate = new Date();
+      // Задаём даты разблокировки
+      const unlockDate7March = new Date("2025-03-07");
+      const unlockDate14Feb = new Date("2025-02-14");
 
-        // Блокировка вкладок до нужных дат
-        if (currentDate < unlockDate7March) {
-            tab7March.innerHTML = "🔒 Откроется 7 марта";
-            tab7March.style.pointerEvents = "none";
-        }
-        if (currentDate < unlockDate14Feb) {
-            tab14Feb.innerHTML = "🔒 Откроется 14 февраля";
-            tab14Feb.style.pointerEvents = "none";
-        }
+      // Блокируем вкладки, если дата ещё не наступила
+      if (currentDate < unlockDate7March) {
+        tab7March.innerHTML = "🔒 Откроется 7 марта";
+        tab7March.classList.add("disabled");
+      }
+      if (currentDate < unlockDate14Feb) {
+        tab14Feb.innerHTML = "🔒 Откроется 14 февраля";
+        tab14Feb.classList.add("disabled");
+      }
 
-        tab7March.addEventListener("click", () => startGame());
+      // Назначаем обработчики событий для разблокированных вкладок
+      if (!tab7March.classList.contains("disabled")) {
+        tab7March.addEventListener("click", () => startGame('7march'));
+      }
+      if (!tab14Feb.classList.contains("disabled")) {
+        tab14Feb.addEventListener("click", () => startGame('14feb'));
+      }
     });
 
-    function startGame() {
-        const gameContainer = document.getElementById("game-container");
+    // Функция запуска игры в зависимости от выбранной вкладки
+    function startGame(tab) {
+      const gameContainer = document.getElementById("game-container");
+      if (tab === '7march') {
         gameContainer.innerHTML = "<p>Начинаем квест! Первая головоломка загружается...</p>";
         loadPuzzle(1);
+      } else if (tab === '14feb') {
+        gameContainer.innerHTML = "<p>Сюрприз для 14 февраля! Здесь будет что-то особенное.</p>";
+        // Можно добавить дополнительный функционал для 14 февраля
+      }
     }
 
+    // Функция загрузки головоломок по уровням
     function loadPuzzle(level) {
-        const gameContainer = document.getElementById("game-container");
-        switch(level) {
-            case 1:
-                gameContainer.innerHTML = "<p>Головоломка 1: Разгадайте шифр!</p><button onclick='nextLevel(2)'>Ответить</button>";
-                break;
-            case 2:
-                gameContainer.innerHTML = "<p>Головоломка 2: Найдите правильный путь в лабиринте!</p><button onclick='nextLevel(3)'>Далее</button>";
-                break;
-            case 3:
-                gameContainer.innerHTML = "<p>Головоломка 3: Соберите пазл!</p><button onclick='finishGame()'>Завершить</button>";
-                break;
-        }
+      const gameContainer = document.getElementById("game-container");
+      switch(level) {
+        case 1:
+          gameContainer.innerHTML = "<p>Головоломка 1: Разгадайте шифр!</p><button onclick='nextLevel(2)'>Ответить</button>";
+          break;
+        case 2:
+          gameContainer.innerHTML = "<p>Головоломка 2: Найдите правильный путь в лабиринте!</p><button onclick='nextLevel(3)'>Далее</button>";
+          break;
+        case 3:
+          gameContainer.innerHTML = "<p>Головоломка 3: Соберите пазл!</p><button onclick='finishGame()'>Завершить</button>";
+          break;
+        default:
+          gameContainer.innerHTML = "<p>Квест завершён.</p>";
+      }
     }
 
+    // Переход к следующему уровню
     function nextLevel(level) {
-        loadPuzzle(level);
+      loadPuzzle(level);
     }
 
+    // Завершение квеста
     function finishGame() {
-        const gameContainer = document.getElementById("game-container");
-        gameContainer.innerHTML = "<p>Поздравляем! Вы собрали всю фотографию 🎉</p>";
+      const gameContainer = document.getElementById("game-container");
+      gameContainer.innerHTML = "<p>Поздравляем! Вы собрали всю фотографию 🎉</p>";
     }
-</script>
-
+  </script>
 </body>
 </html>
