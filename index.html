@@ -355,7 +355,7 @@
     /* Задаём дату разблокировки (МСК).
        Для тестирования можно временно задать, например:
        const unlockDate = new Date(Date.now() + 60000); // через 1 минуту */
-    const unlockDate = new Date("2025-02-05T00:00:00+01:00");
+    const unlockDate = new Date("2025-02-07T00:00:00+01:00");
     
     let gameCompletion = { puzzle: false, quiz: false, maze: false, memory: false };
     let currentQuiz = 0, quizScore = 0;
@@ -460,7 +460,7 @@
       // Рассчитываем базовый размер шрифта относительно ширины экрана
       const baseFontSize = Math.max(20, timerCanvas.width / 20);
       timerCtx.font = `bold ${baseFontSize}px Roboto`;
-      timerCtx.fillText("Ожидай, всё станет ясно 7 февраля!", timerCanvas.width/2, timerCanvas.height/2 - baseFontSize * 1.5);
+      timerCtx.fillText("Подожди 7-е февраля", timerCanvas.width/2, timerCanvas.height/2 - baseFontSize * 1.5);
       if (diff > 0) {
         const days = Math.floor(diff / (1000 * 60 * 60 * 24));
         const hours = Math.floor((diff / (1000 * 60 * 60)) % 24);
