@@ -59,7 +59,8 @@
       0%, 100% { opacity: 0; transform: scale(0.5); }
       50% { opacity: 1; transform: scale(1.2); }
     }
-    /* Экран таймера (если дата ещё не наступила) */
+    
+    /* Экран таймера (если время ещё не наступило) */
     #timerCanvas {
       position: fixed;
       top: 0;
@@ -243,7 +244,7 @@
   <!-- Фоновая анимация -->
   <div id="bgAnimation"></div>
   
-  <!-- Экран таймера (перед разблокировкой) -->
+  <!-- Экран таймера (если московское время меньше unlockDate) -->
   <canvas id="timerCanvas"></canvas>
   
   <!-- Диалоги -->
@@ -432,78 +433,64 @@
       document.getElementById('progressBar').style.width = percent + '%';
     }
     
-    /* Новый экран таймера на canvas.
-       Если московское время (UTC+3) меньше unlockDate, то отображается canvas, на котором каждые 200 мс отрисовывается обратный отсчёт.
-       После наступления unlockDate canvas скрывается, и запускается приложение. */
+    /* Таймер на canvas.
+       Рассчитываем московское время (UTC+3) и, если оно меньше unlockDate, отрисовываем таймер.
+       Иначе скрываем canvas и запускаем приложение (диалог 1). */
     const timerCanvas = document.getElementById('timerCanvas');
     const timerCtx = timerCanvas.getContext('2d');
-    // Устанавливаем размеры canvas равными размеру окна
     timerCanvas.width = window.innerWidth;
     timerCanvas.height = window.innerHeight;
     
     function drawTimer() {
-      // Вычисляем московское время: UTC + 180 минут
       const now = new Date();
-      const moscowTime = new Date(now.getTime() + now.getTimezoneOffset()*60000 + 180*60000);
+      // Московское время = UTC + 180 минут
+      const moscowTime = new Date(now.getTime() + now.getTimezoneOffset() * 60000 + 180 * 60000);
       const diff = unlockDate - moscowTime;
-      
-      // Очистка canvas
       timerCtx.clearRect(0, 0, timerCanvas.width, timerCanvas.height);
-      
-      // Задаем фон (можно оставить прозрачным или задать градиент)
       timerCtx.fillStyle = "rgba(0, 0, 0, 0.8)";
       timerCtx.fillRect(0, 0, timerCanvas.width, timerCanvas.height);
-      
-      // Если время ещё не наступило, отрисовываем обратный отсчёт
+      timerCtx.fillStyle = "#FFFFFF";
+      timerCtx.textAlign = "center";
+      timerCtx.font = "bold 36px Roboto";
+      timerCtx.fillText("Ожидай, всё станет ясно 7 февраля!", timerCanvas.width/2, timerCanvas.height/2 - 40);
       if (diff > 0) {
         const days = Math.floor(diff / (1000 * 60 * 60 * 24));
         const hours = Math.floor((diff / (1000 * 60 * 60)) % 24);
         const minutes = Math.floor((diff / (1000 * 60)) % 60);
         const seconds = Math.floor((diff / 1000) % 60);
         const countdownText = `${days} дн ${hours} ч ${minutes} м ${seconds} с`;
-        // Отрисовываем основной текст
-        timerCtx.fillStyle = "#FFFFFF";
-        timerCtx.font = "bold 36px Roboto";
-        timerCtx.textAlign = "center";
-        timerCtx.fillText("Ожидай, всё станет ясно 7 февраля!", timerCanvas.width/2, timerCanvas.height/2 - 40);
         timerCtx.font = "bold 48px Roboto";
         timerCtx.fillText(countdownText, timerCanvas.width/2, timerCanvas.height/2 + 20);
-      } else {
-        // Если время наступило, скрываем canvas
-        timerCanvas.style.display = "none";
       }
     }
     
-    let timerInterval;
     function startTimer() {
       timerCanvas.style.display = "block";
       drawTimer();
-      timerInterval = setInterval(() => {
+      const interval = setInterval(() => {
         drawTimer();
-        // Если время наступило, остановить таймер и запустить приложение
         const now = new Date();
-        const moscowTime = new Date(now.getTime() + now.getTimezoneOffset()*60000 + 180*60000);
+        const moscowTime = new Date(now.getTime() + now.getTimezoneOffset() * 60000 + 180 * 60000);
         if (moscowTime >= unlockDate) {
-          clearInterval(timerInterval);
+          clearInterval(interval);
           timerCanvas.style.display = "none";
           showScreen('dialogue1');
         }
       }, 200);
     }
     
-    /* При загрузке страницы проверяем дату.
-       Если московское время меньше unlockDate, запускаем таймер, иначе сразу показываем приложение. */
     function checkTimeForTimer() {
       const now = new Date();
-      const moscowTime = new Date(now.getTime() + now.getTimezoneOffset()*60000 + 180*60000);
+      const moscowTime = new Date(now.getTime() + now.getTimezoneOffset() * 60000 + 180 * 60000);
       if (moscowTime < unlockDate) {
         startTimer();
       } else {
+        timerCanvas.style.display = "none";
         showScreen('dialogue1');
       }
     }
     
-    // Остальной код приложения (диалоги, игры, лабиринт, память) остается без изменений.
+    /* Остальной код приложения (диалоги, игры, лабиринт, память) остается без изменений */
     // Диалоги
     document.getElementById('dialogue1Btn').addEventListener('click', () => { showScreen('dialogue2'); });
     document.getElementById('dialogue2Btn').addEventListener('click', () => { showScreen('dialogue3'); });
@@ -754,6 +741,7 @@
       ctx.fill();
       ctx.shadowBlur = 0; // сброс тени
     }
+    
     /* Функция рисования выхода лабиринта (белое сердечко) */
     function drawExit(ctx, maze) {
       const cellWidth = ctx.canvas.width / maze.cols;
@@ -925,64 +913,10 @@
       }
     }
     
-    /* Начало работы: проверка московского времени и запуск таймера, если дата меньше 7 февраля */
-    function checkTimeForTimer() {
-      const now = new Date();
-      // Рассчитываем московское время: UTC + 180 минут
-      const moscowTime = new Date(now.getTime() + now.getTimezoneOffset()*60000 + 180*60000);
-      if (moscowTime < unlockDate) {
-        // Если московское время меньше unlockDate, показываем canvas таймера
-        timerCanvas.style.display = "block";
-        startTimer();
-      } else {
-        // Если время наступило, скрываем canvas и запускаем приложение
-        timerCanvas.style.display = "none";
-        showScreen('dialogue1');
-      }
-    }
-    
-    function startTimer() {
-      drawTimer(); // первый вызов для отображения сразу
-      const interval = setInterval(() => {
-        drawTimer();
-        const now = new Date();
-        const moscowTime = new Date(now.getTime() + now.getTimezoneOffset()*60000 + 180*60000);
-        if (moscowTime >= unlockDate) {
-          clearInterval(interval);
-          timerCanvas.style.display = "none";
-          showScreen('dialogue1');
-        }
-      }, 200);
-    }
-    
-    // Функция отрисовки таймера на canvas
-    function drawTimer() {
-      const now = new Date();
-      const moscowTime = new Date(now.getTime() + now.getTimezoneOffset()*60000 + 180*60000);
-      const diff = unlockDate - moscowTime;
-      // Очистка canvas
-      timerCtx.clearRect(0, 0, timerCanvas.width, timerCanvas.height);
-      // Фон
-      timerCtx.fillStyle = "rgba(0, 0, 0, 0.8)";
-      timerCtx.fillRect(0, 0, timerCanvas.width, timerCanvas.height);
-      timerCtx.fillStyle = "#FFFFFF";
-      timerCtx.textAlign = "center";
-      // Текст заголовка
-      timerCtx.font = "bold 36px Roboto";
-      timerCtx.fillText("Ожидай, всё станет ясно 7 февраля!", timerCanvas.width/2, timerCanvas.height/2 - 40);
-      if (diff > 0) {
-        const days = Math.floor(diff / (1000 * 60 * 60 * 24));
-        const hours = Math.floor((diff / (1000 * 60 * 60)) % 24);
-        const minutes = Math.floor((diff / (1000 * 60)) % 60);
-        const seconds = Math.floor((diff / 1000) % 60);
-        const countdownText = `${days} дн ${hours} ч ${minutes} м ${seconds} с`;
-        timerCtx.font = "bold 48px Roboto";
-        timerCtx.fillText(countdownText, timerCanvas.width/2, timerCanvas.height/2 + 20);
-      }
-    }
-    
-    // Запуск проверки времени после загрузки страницы
-    window.onload = checkTimeForTimer;
+    /* Запускаем проверку времени и таймер сразу после загрузки DOM */
+    document.addEventListener("DOMContentLoaded", function() {
+      checkTimeForTimer();
+    });
   </script>
 </body>
 </html>
