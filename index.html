@@ -21,7 +21,6 @@
       display: none;
       width: 100%;
       height: 100vh;
-      display: flex;
       flex-direction: column;
       align-items: center;
       justify-content: center;
@@ -64,7 +63,6 @@
       transform: scale(1.1);
     }
 
-    /* Анимация сердечек */
     @keyframes floatingHeart {
       0% { transform: translateY(0) scale(1); opacity: 1; }
       100% { transform: translateY(-100px) scale(1.5); opacity: 0; }
@@ -78,7 +76,6 @@
   </style>
 </head>
 <body>
-  <!-- Главное меню -->
   <div id="mainMenu" class="screen active">
     <div class="container">
       <h1>Pixel Desire</h1>
@@ -87,7 +84,6 @@
     </div>
   </div>
 
-  <!-- Выбор категории заданий -->
   <div id="categoryScreen" class="screen">
     <div class="container">
       <h1>Выбери категорию</h1>
@@ -99,7 +95,6 @@
     </div>
   </div>
 
-  <!-- Экран с заданиями -->
   <div id="taskScreen" class="screen">
     <div class="container">
       <h1>Твое задание</h1>
@@ -113,12 +108,10 @@
     const tg = window.Telegram.WebApp;
     tg.expand();
 
-    // Получаем экраны
     const mainMenu = document.getElementById("mainMenu");
     const categoryScreen = document.getElementById("categoryScreen");
     const taskScreen = document.getElementById("taskScreen");
     
-    // Кнопки
     const startButton = document.getElementById("startButton");
     const backToMenu = document.getElementById("backToMenu");
     const backToCategories = document.getElementById("backToCategories");
@@ -130,34 +123,31 @@
     const taskText = document.getElementById("taskText");
     const nextTask = document.getElementById("nextTask");
 
-    // Список заданий по категориям
     const tasks = {
       romantic: [
         "Скажи партнеру 3 вещи, которые ты в нем любишь ❤️",
-        "Сделайте совместное фото и поставьте его на заставку 📸",
-        "Положите телефон и проведите 10 минут, глядя друг другу в глаза 💕"
+        "Сделайте совместное фото 📸",
+        "Проведите 10 минут, глядя друг другу в глаза 💕"
       ],
       fun: [
-        "Изобрази животное, а партнер должен угадать 🦁",
-        "Расскажите друг другу самую смешную историю из жизни 😂",
-        "Испеките что-то вместе (или закажите и притворитесь, что готовили) 🍪"
+        "Изобрази животное, а партнер угадает 🦁",
+        "Расскажите самую смешную историю 😂",
+        "Испеките что-то вместе 🍪"
       ],
       challenge: [
-        "Выдержите 10 секунд крепкого объятия без смеха 🤗",
+        "Выдержите 10 секунд крепкого объятия 🤗",
         "Поцелуй партнера в 5 разных мест 😘",
-        "Сыграйте в камень-ножницы-бумага: проигравший выполняет желание 🔥"
+        "Сыграйте в камень-ножницы-бумага 🔥"
       ]
     };
 
     let currentCategory = "";
 
-    // Функция переключения экранов
     function showScreen(screen) {
       document.querySelectorAll(".screen").forEach(s => s.classList.remove("active"));
       screen.classList.add("active");
     }
 
-    // Выбор категории заданий
     romanticTasks.addEventListener("click", () => {
       currentCategory = "romantic";
       showScreen(taskScreen);
@@ -176,7 +166,6 @@
       showRandomTask();
     });
 
-    // Генерация случайного задания
     function showRandomTask() {
       if (currentCategory) {
         let taskList = tasks[currentCategory];
@@ -185,27 +174,9 @@
     }
 
     nextTask.addEventListener("click", showRandomTask);
-
-    // Кнопки переходов
     startButton.addEventListener("click", () => showScreen(categoryScreen));
     backToMenu.addEventListener("click", () => showScreen(mainMenu));
     backToCategories.addEventListener("click", () => showScreen(categoryScreen));
-
-    // Генерация сердечек
-    function createHearts() {
-      for (let i = 0; i < 10; i++) {
-        setTimeout(() => {
-          const heart = document.createElement("div");
-          heart.className = "heart";
-          heart.style.left = Math.random() * 100 + "vw";
-          heart.style.top = Math.random() * 100 + "vh";
-          heart.textContent = "❤";
-          document.body.appendChild(heart);
-          setTimeout(() => heart.remove(), 2000);
-        }, i * 300);
-      }
-    }
-    setInterval(createHearts, 5000);
   </script>
 </body>
 </html>
