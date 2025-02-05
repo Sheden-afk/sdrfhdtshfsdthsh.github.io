@@ -41,14 +41,62 @@
         <div id="game-output"></div>
     </div>
 
-    <script>
-        const tg = window.Telegram.WebApp;
-        tg.expand(); // Разворачиваем Web App
+<script>
+    const tg = window.Telegram.WebApp;
+    tg.expand(); // Разворачиваем Web App
 
-        function startGame() {
-            document.getElementById('game-output').innerHTML = "<p>Загружается квест...</p>";
-            // Здесь будет загрузка квеста
+    document.addEventListener("DOMContentLoaded", () => {
+        const tab7March = document.getElementById("tab-7march");
+        const tab14Feb = document.getElementById("tab-14feb");
+        const gameContainer = document.getElementById("game-container");
+
+        const currentDate = new Date();
+        const unlockDate7March = new Date("2025-03-07");
+        const unlockDate14Feb = new Date("2025-02-14");
+
+        // Блокировка вкладок до нужных дат
+        if (currentDate < unlockDate7March) {
+            tab7March.innerHTML = "🔒 Откроется 7 марта";
+            tab7March.style.pointerEvents = "none";
         }
-    </script>
+        if (currentDate < unlockDate14Feb) {
+            tab14Feb.innerHTML = "🔒 Откроется 14 февраля";
+            tab14Feb.style.pointerEvents = "none";
+        }
+
+        tab7March.addEventListener("click", () => startGame());
+    });
+
+    function startGame() {
+        const gameContainer = document.getElementById("game-container");
+        gameContainer.innerHTML = "<p>Начинаем квест! Первая головоломка загружается...</p>";
+        loadPuzzle(1);
+    }
+
+    function loadPuzzle(level) {
+        const gameContainer = document.getElementById("game-container");
+        switch(level) {
+            case 1:
+                gameContainer.innerHTML = "<p>Головоломка 1: Разгадайте шифр!</p><button onclick='nextLevel(2)'>Ответить</button>";
+                break;
+            case 2:
+                gameContainer.innerHTML = "<p>Головоломка 2: Найдите правильный путь в лабиринте!</p><button onclick='nextLevel(3)'>Далее</button>";
+                break;
+            case 3:
+                gameContainer.innerHTML = "<p>Головоломка 3: Соберите пазл!</p><button onclick='finishGame()'>Завершить</button>";
+                break;
+        }
+    }
+
+    function nextLevel(level) {
+        loadPuzzle(level);
+    }
+
+    function finishGame() {
+        const gameContainer = document.getElementById("game-container");
+        gameContainer.innerHTML = "<p>Поздравляем! Вы собрали всю фотографию 🎉</p>";
+    }
+</script>
+
 </body>
 </html>
