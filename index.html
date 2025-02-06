@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <!-- Запрещаем масштабирование на мобильных устройствах -->
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
-  <title>Pixel Desire - Игра для пар</title>
+  <title>Люблю тебя, котик</title>
   <!-- Современный шрифт -->
   <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
   <!-- Скрипт Telegram Web App -->
@@ -250,19 +250,19 @@
   <!-- Диалоги -->
   <div id="dialogue1" class="screen">
     <div class="container">
-      <p>Каждый раз, когда я думаю о тебе, моё сердце наполняется радостью.</p>
+      <p>Я люблю тебя, котёночек мой</p>
       <button id="dialogue1Btn">Продолжить</button>
     </div>
   </div>
   <div id="dialogue2" class="screen">
     <div class="container">
-      <p>Ты – мой свет, моя опора и вдохновение.</p>
+      <p>Ты – мой свет, моя опора и вдохновение</p>
       <button id="dialogue2Btn">Продолжить</button>
     </div>
   </div>
   <div id="dialogue3" class="screen">
     <div class="container">
-      <p>С тобой я чувствую настоящую любовь и готов любить тебя вечно.</p>
+      <p>С тобой я чувствую себя собой и хочу быть всегда с тобой</p>
       <button id="dialogue3Btn">Продолжить</button>
     </div>
   </div>
@@ -270,18 +270,18 @@
   <!-- Экран выбора игр -->
   <div id="categoryScreen" class="screen">
     <div class="container">
-      <h1>Выбери игру</h1>
-      <p>Испытай свою любовь через игру</p>
+      <h1>Пройди все 4 игры</h1>
+      <p>Хи-хи-хи</p>
       <div id="progressContainer">
         <div id="progressText">Осталось игр: 4</div>
         <div id="progressBarContainer">
           <div id="progressBar"></div>
         </div>
       </div>
-      <button id="puzzleGameBtn">Собери пазл</button>
-      <button id="quizGameBtn">Викторина</button>
+      <button id="puzzleGameBtn">Собери китика</button>
+      <button id="quizGameBtn">Вопросиксы</button>
       <button id="mazeGameBtn">Лабиринт</button>
-      <button id="memoryGameBtn">Найди пары</button>
+      <button id="memoryGameBtn">Найди пару</button>
       <button id="backToDialogues" style="background:#777;">Назад</button>
     </div>
   </div>
@@ -289,8 +289,8 @@
   <!-- Puzzle Game -->
   <div id="puzzleScreen" class="screen">
     <div class="container">
-      <h1>Собери пазл</h1>
-      <p>Перетащите фрагменты или тапните два для обмена местами</p>
+      <h1>Собери китика</h1>
+      <p>Выбери и тыкни для обмена местами</p>
       <div id="puzzleGameContainer"></div>
       <button id="backToCategories1">Назад</button>
     </div>
@@ -299,7 +299,7 @@
   <!-- Quiz Game -->
   <div id="quizScreen" class="screen">
     <div class="container">
-      <h1>Викторина</h1>
+      <h1>Вопросиксы</h1>
       <p id="quizQuestion">Вопрос</p>
       <button class="quizOption" data-index="0">Ответ 1</button>
       <button class="quizOption" data-index="1">Ответ 2</button>
@@ -312,7 +312,7 @@
   <div id="mazeScreen" class="screen">
     <div class="container">
       <h1>Лабиринт</h1>
-      <p>Пройдите путь к сердцу!</p>
+      <p>Не жульничай пазязя</p>
       <canvas id="mazeCanvas" width="300" height="300"></canvas>
       <div id="mazeControls">
         <button id="btnUp">↑</button>
@@ -329,8 +329,8 @@
   <!-- Memory Game -->
   <div id="memoryScreen" class="screen">
     <div class="container">
-      <h1>Найди пары</h1>
-      <p>Найдите все пары карточек</p>
+      <h1>Найди пару</h1>
+      <p>Найдите все пары сердечкам</p>
       <div id="memoryGameContainer"></div>
       <button id="backToCategories4">Назад</button>
     </div>
@@ -340,8 +340,8 @@
   <div id="resultsScreen" class="screen">
     <div class="container">
       <h1>Итоги</h1>
-      <p id="resultsText">Результаты вашей любви</p>
-      <button id="restartButton">Начать заново</button>
+      <p id="resultsText">Кооооотик, я люблю люблю люблю тебя сильне сильне сильнее всего на свете</p>
+      <button id="restartButton">Можешь пройти по новой</button>
     </div>
   </div>
   
@@ -355,7 +355,7 @@
     /* Задаём дату разблокировки (МСК).
        Для тестирования можно временно задать, например:
        const unlockDate = new Date(Date.now() + 60000); // через 1 минуту */
-    const unlockDate = new Date("2025-02-07T00:00:00+01:00");
+    const unlockDate = new Date("2025-02-06T00:00:00+01:00");
     
     let gameCompletion = { puzzle: false, quiz: false, maze: false, memory: false };
     let currentQuiz = 0, quizScore = 0;
@@ -1195,7 +1195,7 @@
         if (!document.getElementById('resultsButton')) {
           const resultsButton = document.createElement('button');
           resultsButton.id = 'resultsButton';
-          resultsButton.textContent = 'Итоги';
+          resultsButton.textContent = 'Опа чоита';
           resultsButton.addEventListener('click', () => {
             showScreen('resultsScreen');
             displayResults();
@@ -1206,7 +1206,7 @@
     }
     function displayResults() {
       const loveScore = Math.floor((quizScore / quizQuestions.length) * 100);
-      document.getElementById('resultsText').textContent = "Ваш уровень любви: " + loveScore + "%. Вы доказали, что ваша любовь крепка и настояща!";
+      document.getElementById('resultsText').textContent = "Кооооотик, я люблю люблю люблю тебя сильнее сильнее сильнее всего на свете. С праздничком :3 🤍🤍🤍";
     }
     
     /* --- Maze Game --- */
