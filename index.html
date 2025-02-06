@@ -339,7 +339,7 @@
   <!-- Results -->
   <div id="resultsScreen" class="screen">
     <div class="container">
-      <h1>Итоги</h1>
+      <h1>Кооооооотик</h1>
       <p id="resultsText">Кооооотик, я люблю люблю люблю тебя сильне сильне сильнее всего на свете</p>
       <button id="restartButton">Можешь пройти по новой</button>
     </div>
@@ -359,7 +359,7 @@
     
     let gameCompletion = { puzzle: false, quiz: false, maze: false, memory: false };
     let currentQuiz = 0, quizScore = 0;
-    const heartEmojis = ['❤️','💛','💚','💙','💜','🧡','💖','💘'];
+    const heartEmojis = ['🤍','💛','💚','💙','💜','🧡','💖','💘'];
     
     // Для лабиринта
     let currentMaze, currentPlayer, mazeKeyHandler;
@@ -806,7 +806,7 @@
       if (first.dataset.value === second.dataset.value) {
         window.memoryState.matches++;
         if (window.memoryState.matches === 8) {
-          alert("Вы нашли все пары!");
+          alert("Все сердечки с парами!");
           gameCompletion.memory = true;
           updateProgressBar();
           checkAllGamesCompleted();
